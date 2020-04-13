@@ -5,7 +5,7 @@ upstreams.
 
 #### Use Case
 
-I have the domain test.com. The DNS A record resolves to the machine has this proxy running, and then, the proxy forwards the request to my other machine(s).
+I have the domain test.com. The DNS A record resolves to the machine that has this proxy running, and then, the proxy forwards the request to my other machine(s).
 
 #### Features
 * GUI to add/edit/remove virtual hosts and correspondents upstreams (hot reload)
