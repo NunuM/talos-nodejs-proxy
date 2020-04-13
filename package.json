@@ -7,6 +7,10 @@
   },
   "author": "Nunu",
   "license": "ISC",
+  "repository": {
+    "url": "https://github.com/NunuM/talos-nodejs-proxy",
+    "type": "git"
+  },
   "dependencies": {
     "log4js": "^6.1.2",
     "redis": "^3.0.2",
