@@ -1,0 +1,199 @@
+const http = require('http');
+const fs = require('fs');
+
+const {manager, repository} = require('./src/app/bootstrap');
+const {LOGGER, _, handler} = require('./src/service/logger_service');
+const {VirtualHost} = require('./src/model/virtual_host');
+const {UpstreamHost} = require('./src/model/upstream_host');
+const {Config} = require('./src/app/config');
+const PORT = Config.serverPort();
+const ADMIN_PORT = Config.serverAdminUIPort();
+
+console.log(`
+  _____     _             ____                      
+ |_   _|_ _| | ___  ___  |  _ \\ _ __ _____  ___   _ 
+   | |/ _\` | |/ _ \\/ __| | |_) | '__/ _ \\ \\/ / | | |
+   | | (_| | | (_) \\__ \\ |  __/| | | (_) >  <| |_| |
+   |_|\\__,_|_|\\___/|___/ |_|   |_|  \\___/_/\\_\\\\__, |
+                                              |___/ 
+`);
+
+
+/**
+ * Proxy server
+ * @type {Server}
+ */
+const proxyServer = http.createServer((proxyRequest, proxyResponse) => {
+
+    const start = new Date();
+
+    handler(proxyRequest, proxyResponse, () => {
+    });
+
+    const clientHeader = proxyRequest.headers['host'] || '';
+
+    manager
+        .resolveVirtualHost(clientHeader)
+        .then((virtualHost) => {
+            if (virtualHost) {
+
+                const server = virtualHost.nextUpstream();
+
+                if (server) {
+
+                    const options = {
+                        hostname: server.host,
+                        port: server.port,
+                        path: proxyRequest.url,
+                        method: proxyRequest.method,
+                        headers: proxyRequest.headers
+                    };
+
+                    let virtualHostRequest = http.request(options, (virtualHostResponse) => {
+
+                        proxyResponse.writeHead(virtualHostResponse.statusCode, virtualHostResponse.headers);
+
+                        virtualHostResponse.pipe(proxyResponse);
+
+                        virtualHostResponse.on('end', () => {
+                            proxyResponse.end();
+                        });
+                    });
+
+                    proxyRequest.pipe(virtualHostRequest);
+
+                    proxyRequest.on('end', () => {
+                        virtualHostRequest.end();
+                    });
+
+                    virtualHostRequest.on('error', (e) => {
+                        LOGGER.error("problem with request", clientHeader, server, e);
+                        proxyResponse.writeHead(503);
+                        proxyResponse.end();
+                    });
+
+                    proxyResponse.on('finish', () => {
+
+                        const responseTiming = new Date() - start;
+
+                        manager.requestServed(proxyResponse.statusCode, responseTiming, clientHeader);
+
+                    });
+
+                } else {
+                    LOGGER.error('Not upstream host available', clientHeader, virtualHost);
+                    proxyResponse.writeHead(503);
+                    proxyResponse.end();
+                }
+
+            } else {
+                proxyResponse.end();
+            }
+        })
+        .catch((error) => {
+            LOGGER.error("Error resolving host", clientHeader, error);
+            proxyResponse.end();
+        });
+
+}).on('clientError', (err, socket) => {
+    socket.end();
+}).on('connection', (connection) => {
+    LOGGER.debug(`Receive new connection with remote IP: ${connection.remoteAddress}`);
+}).on('error', (e) => {
+    LOGGER.error(`Occurred an error on proxy server: ${e.message}`);
+    proxyServer.close();
+}).listen(PORT, () => {
+    LOGGER.info(`Server is running at: ${PORT}`);
+});
+
+
+http.createServer(
+    (req, res) => {
+
+        handler(req, res, () => {
+        });
+
+        if (req.headers.authorization && `Basic ${Config.serverAdminPassword()}` === req.headers.authorization) {
+
+            const path = req.url || '';
+
+            if (path.endsWith("index.html")) {
+
+                res.writeHead(200, {'content-type': 'text/html'});
+
+                fs.createReadStream("./ui/index.html").pipe(res);
+
+            } else if (path.startsWith('/api/vhost')) {
+
+                if (req.method === 'PUT') {
+                    let payload = '';
+                    req.on('data', (chunk) => {
+                        payload += chunk.toString();
+                    });
+
+                    req.on('end', () => {
+                        try {
+                            const newVHost = JSON.parse(payload);
+
+                            LOGGER.info('Inserting vHost', newVHost);
+
+                            manager.addVirtualHost(new VirtualHost(newVHost.host,
+                                newVHost.name,
+                                Number(newVHost.lb),
+                                newVHost.upstreamHosts.map((u) => new UpstreamHost(u.host, u.port))
+                            ));
+
+                            res.end();
+                        } catch (e) {
+                            res.writeHead(400);
+                            res.end();
+                        }
+                    });
+                } else if (req.method === 'DELETE') {
+
+                    const parts = req.url.split('=');
+
+                    if (parts.length >= 2) {
+                        const host = parts[1];
+                        LOGGER.info('Deleting host', host);
+                        manager.removeVirtualHostBykey(host);
+                        res.end();
+                    } else {
+                        res.writeHead(400);
+                        res.end();
+                    }
+
+                } else {
+                    res.writeHead(200, {'content-type': 'application/json'});
+
+                    res.end(JSON.stringify(manager.virtualHosts().map(e => e.toJSON())));
+                }
+
+            } else if (path.endsWith('api/stats')) {
+
+                repository
+                    .loadStats()
+                    .then((result) => {
+                        res.writeHead(200, {'content-type': 'application/json'});
+                        res.end(JSON.stringify(result));
+                    })
+                    .catch((err) => {
+                        res.writeHead(500);
+                        res.end();
+                    })
+
+            } else {
+                res.writeHead(404);
+                res.end();
+            }
+        } else {
+
+            res.writeHead(401, {'WWW-Authenticate': 'Basic realm="User Visible Realm", charset="UTF-8"'});
+            res.end();
+
+        }
+    })
+    .listen(ADMIN_PORT, () => {
+        LOGGER.info(`Admin WebUI is running at: ${ADMIN_PORT}`);
+    });
+

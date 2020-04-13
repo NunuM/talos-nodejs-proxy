@@ -1,0 +1,19 @@
+{
+  "name": "talos-node-proxy",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www"
+  },
+  "author": "Nunu",
+  "license": "ISC",
+  "dependencies": {
+    "log4js": "^6.1.2",
+    "redis": "^3.0.2",
+    "@log4js-node/smtp": "^1.1.0"
+  },
+  "devDependencies": {
+    "madge": "^3.8.0",
+    "mocha": "^7.1.0"
+  }
+}
