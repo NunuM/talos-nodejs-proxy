@@ -7,7 +7,7 @@ upstreams.
 * GUI to add/edit/remove virtual hosts and correspondents upstreams (hot reload)
 * GUI to define load balancing policy
 * GUI with authentication
-* Regex alike with '*'
+* Regex alike matches with '*' character, eg: *.test.com
 * Health checking to upstreams.
 * Persistence in memory or redis
 * Collect stats: latency,total requests, status
