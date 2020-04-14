@@ -1,5 +1,6 @@
 const http = require('http');
 const fs = require('fs');
+const pathJS = require('path');
 
 const {manager, repository} = require('./src/app/bootstrap');
 const {LOGGER, _, handler} = require('./src/service/logger_service');
@@ -113,15 +114,16 @@ http.createServer(
         handler(req, res, () => {
         });
 
-        if (req.headers.authorization && `Basic ${Config.serverAdminPassword()}` === req.headers.authorization) {
+        if (req.headers.authorization
+            && `Basic ${Config.serverAdminPassword()}` === req.headers.authorization) {
 
             const path = req.url || '';
 
-            if (path.endsWith("index.html")) {
+            if (/\/(index.html)?(\?.*)?/.test(path)) {
 
                 res.writeHead(200, {'content-type': 'text/html'});
 
-                fs.createReadStream("./ui/index.html").pipe(res);
+                fs.createReadStream(pathJS.join(__dirname, "ui", "index.html")).pipe(res);
 
             } else if (path.startsWith('/api/vhost')) {
 
@@ -169,7 +171,7 @@ http.createServer(
                     res.end(JSON.stringify(manager.virtualHosts().map(e => e.toJSON())));
                 }
 
-            } else if (path.endsWith('api/stats')) {
+            } else if (path.startsWith('/api/stats')) {
 
                 repository
                     .loadStats()
