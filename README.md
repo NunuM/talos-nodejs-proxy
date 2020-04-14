@@ -15,9 +15,9 @@ I have the domain test.com. The DNS A record resolves to the machine that has th
 * GUI to define load balancing policy
 * GUI with authentication
 * Regex alike matches with '*' character, eg: *.test.com
-* Health checking to upstreams.
+* Upstreams Health Check.
 * Persistence in memory or redis
-* Collect stats: latency,total requests, status
+* Collect stats: latency,total requests, status per virtual host
 * Configuration via config file and/or env vars
 
 
