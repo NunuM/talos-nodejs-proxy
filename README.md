@@ -3,6 +3,8 @@
 This proxy forwards HTTP requests based on the host header to the user-defined upstreams. One host can have multiple 
 upstreams. This proxy is being used on [Talos Fog Computing platform](https://talos.sh)
 
+![Reverse Proxy](https://www.cloudflare.com/img/learning/cdn/glossary/reverse-proxy/reverse-proxy-flow.svg)
+source:https://www.cloudflare.com/learning/cdn/glossary/reverse-proxy/
 
 #### Use Case
 
@@ -31,4 +33,4 @@ npm start
 
 #### GUI
 
-![alt text](https://i.ibb.co/N72vdDq/Screenshot-2020-04-13-at-23-31-08.png)
+![Talos Proxy admin panel](https://i.ibb.co/N72vdDq/Screenshot-2020-04-13-at-23-31-08.png)
