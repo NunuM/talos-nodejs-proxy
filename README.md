@@ -32,7 +32,7 @@ npm start
 
 #### Configuration
 
-In config.json, you can point a new file by defining the env var *TLP_CONF_FILE*.
+config.json. You can point a new file by defining the env var *TLP_CONF_FILE*.
 
 ```json
 {
