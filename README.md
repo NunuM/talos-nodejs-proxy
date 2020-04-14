@@ -30,6 +30,29 @@ npm i
 npm start
 ```
 
+#### Configuration
+
+In config.json, you can point a new file by defining the env var *TLP_CONF_FILE*.
+
+```json
+{
+  "appId": "proxy",
+  "smtpServer": "test.com",
+  "errorEmailRecipients": "test@test.com",
+  "logDirectory": "./",
+  "logAccessFormat": ":remote-addr - \":method :url HTTP/:http-version\" :status :content-length \":referrer\" \":user-agent\" :response-time",
+  "loggingFormat": "%[%[[%p]%] %[[%c]%] - %m",
+  "logLevel": "info",
+  "serverPort": 8000,
+  "serverAdminUIPort": 7777,
+  "serverAdminPassword": "cm9vdDpyb290",
+  "password": "root:root",
+  "repository": "memory|redis", 
+  "redisConnectionString": "[redis[s]:]//[[user][:password@]][host][:port][/db-number][?db=db-number[&password=bar[&option=value]]]"
+}
+```
+
+All of the above can e overwritten if the correspondent env var is defined. 
 
 #### GUI
 
