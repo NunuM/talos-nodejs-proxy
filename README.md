@@ -33,4 +33,8 @@ npm start
 
 #### GUI
 
+default user:root
+
+default password:root
+
 ![Talos Proxy admin panel](https://i.ibb.co/N72vdDq/Screenshot-2020-04-13-at-23-31-08.png)

@@ -2,10 +2,11 @@
 const redis = require('redis');
 
 /** project imports */
+const {Config} = require('../app/config');
 const {LOGGER} = require('../service/logger_service');
 
 const client = redis.createClient({
-    database: "1",
+    url: Config.redisConnectionString(),
     retry_strategy: function (options) {
         if (options.error && options.error.code === "ECONNREFUSED") {
             // End reconnecting on a specific error and flush all commands with
@@ -25,6 +26,7 @@ const client = redis.createClient({
         return Math.min(options.attempt * 100, 3000);
     },
 });
+
 
 client.on('error', (error) => {
     LOGGER.error('Redis client error', error);

@@ -21,7 +21,7 @@ const SERVER_ADMIN_PASSWORD = process.env.TLP_SERVER_ADMIN_PASSWORD || config.se
 
 const APP_REPOSITORY = process.env.TLP_APP_REPOSITORY || config.repository || 'memory';
 
-
+const REDIS_CONNECTION_STRING = process.env.TLP_REDIS_CONNECTION_STRING || config.redisConnectionString || '';
 
 /*********************
  *  Email settings
@@ -46,6 +46,10 @@ const LOG_FORMAT = process.env.TLP_LOG_FORMAT || config.loggingFormat || '%[[%d]
 
 
 class Config {
+
+    static redisConnectionString() {
+        return REDIS_CONNECTION_STRING;
+    }
 
     static serverPort() {
         return SERVER_PORT;
