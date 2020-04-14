@@ -47,16 +47,16 @@ if(Config.repository() === 'redis') {
 
     subscriber.subscribe("hosts");
 
-
-    manager.on('stats', (record) => {
-        repository.saveResponseStatus(record);
-    });
-
 } else {
     repository = new InMemoryRepository();
 }
 
-manager.addVirtualHost(new VirtualHost('test.com', 'test', LB_TYPES.FF, [new UpstreamHost('127.0.0.1', 80)]));
+manager.on('stats', (record) => {
+    repository.saveResponseStatus(record);
+});
+
+manager.addVirtualHost(new VirtualHost('test.com', 'test', LB_TYPES.FF, [new UpstreamHost('127.0.0.1', 8090)]));
+
 
 const health = new HealthCheckService(manager);
 health.startHealthCheck().finally();

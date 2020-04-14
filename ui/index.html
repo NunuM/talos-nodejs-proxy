@@ -242,13 +242,14 @@
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular-animate.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular-aria.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular-messages.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular-cookies.js"></script>
 
 <!-- Angular Material Library -->
 <script src="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.12/angular-material.min.js"></script>
 
 <script>
 
-    angular.module('talosproxy', ['ngMaterial', 'ngMessages'])
+    angular.module('talosproxy', ['ngMaterial', 'ngMessages', 'ngCookies'])
         .controller('proxyCtrl', ["$scope", "$http", "$mdToast", "$interval", function ($scope, $http, $mdToast, $interval) {
 
             const defaultHost = {upstreamHosts: [{host: '127.0.0.1', port: 0}]};
@@ -377,11 +378,11 @@
 
             $mdThemingProvider.theme('default').primaryPalette('amber');
 
-            $httpProvider.interceptors.push([function () {
+            $httpProvider.interceptors.push(["$cookies", function ($cookies) {
                 return {
                     response: function (config) {
 
-                        config.headers['Authorization'] = 'Basic cm9vdDpyb290';
+                        config.headers['Authorization'] = 'Basic ' + $cookies.get('password');
 
                         return config;
                     }

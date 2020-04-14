@@ -19,6 +19,8 @@ console.log(`
                                               |___/ 
 `);
 
+const DEFAULT_NEXT = function () {
+};
 
 /**
  * Proxy server
@@ -28,8 +30,7 @@ const proxyServer = http.createServer((proxyRequest, proxyResponse) => {
 
     const start = new Date();
 
-    handler(proxyRequest, proxyResponse, () => {
-    });
+    handler(proxyRequest, proxyResponse, DEFAULT_NEXT);
 
     const clientHeader = proxyRequest.headers['host'] || '';
 
@@ -111,17 +112,19 @@ const proxyServer = http.createServer((proxyRequest, proxyResponse) => {
 http.createServer(
     (req, res) => {
 
-        handler(req, res, () => {
-        });
+        handler(req, res, DEFAULT_NEXT);
 
         if (req.headers.authorization
             && `Basic ${Config.serverAdminPassword()}` === req.headers.authorization) {
 
             const path = req.url || '';
 
-            if (/\/(index.html)?(\?.*)?/.test(path)) {
+            if (path === '/' || path.startsWith('/index.html') ) {
 
-                res.writeHead(200, {'content-type': 'text/html'});
+                res.writeHead(200, {
+                    'content-type': 'text/html',
+                    'Set-Cookie': 'password=' + Config.serverAdminPassword()
+                });
 
                 fs.createReadStream(pathJS.join(__dirname, "ui", "index.html")).pipe(res);
 
