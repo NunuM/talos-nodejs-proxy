@@ -4,7 +4,7 @@ This proxy forwards HTTP requests based on the host header to the user-defined u
 upstreams. This proxy is being used on [Talos Fog Computing platform](https://talos.sh)
 
 ![Reverse Proxy](https://www.cloudflare.com/img/learning/cdn/glossary/reverse-proxy/reverse-proxy-flow.svg)
-source:https://www.cloudflare.com/learning/cdn/glossary/reverse-proxy/
+source: [cloudflare](https://www.cloudflare.com/learning/cdn/glossary/reverse-proxy/)
 
 #### Use Case
 
