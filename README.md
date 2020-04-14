@@ -46,7 +46,6 @@ config.json. You can point a new file by defining the env var *TLP_CONF_FILE*.
   "serverPort": 8000,
   "serverAdminUIPort": 7777,
   "serverAdminPassword": "cm9vdDpyb290",
-  "password": "root:root",
   "repository": "memory|redis", 
   "redisConnectionString": "[redis[s]:]//[[user][:password@]][host][:port][/db-number][?db=db-number[&password=bar[&option=value]]]"
 }
