@@ -19,6 +19,16 @@ I have the domain test.com. The DNS A record resolves to the machine that has th
 * Configuration via config file and/or env vars
 
 
+#### Installation
+
+```bash
+git clone https://github.com/NunuM/talos-nodejs-proxy my-proxy
+cd my-proxy
+npm i
+npm start
+```
+
+
 #### GUI
 
 ![alt text](https://i.ibb.co/N72vdDq/Screenshot-2020-04-13-at-23-31-08.png)
