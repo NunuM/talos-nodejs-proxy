@@ -5,7 +5,7 @@ const path = require('path');
 let config = {};
 
 try {
-    config = require(process.env.TLP_CONF_FILE || path.join(__dirname, '../../config'));
+    config = require(process.env.TLP_CONF_FILE || path.join(__dirname, '..', '..', 'config'));
 } catch (e) {
 }
 
