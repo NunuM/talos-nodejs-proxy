@@ -52,7 +52,11 @@ config.json. You can point a new file by defining the env var *TLP_CONF_FILE*.
 }
 ```
 
-All of the above can e overwritten if the correspondent env var is defined. 
+All of the above can e overwritten if the correspondent env var is defined.
+
+[Basic Authentication:](https://en.wikipedia.org/wiki/Basic_access_authentication)
+
+* The *serverAdminPassword* is base64 of root:root
 
 #### GUI
 
