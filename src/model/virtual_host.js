@@ -14,10 +14,10 @@ class VirtualHost {
      * @constructor
      * @param {string} host
      * @param {string} name
-     * @param {number} lb;
+     * @param {number} loadBalancing;
      * @param {Array<UpstreamHost>} upstreamHosts
      */
-    constructor(host, name, lb, upstreamHosts) {
+    constructor(host, name, loadBalancing, upstreamHosts) {
         this._host = host;
         this._name = name;
         this._upstreamHosts = upstreamHosts;
@@ -30,8 +30,8 @@ class VirtualHost {
         } else {
             this._regex = null;
         }
-        this._lb = lb;
-        switch (lb) {
+        this._lb = loadBalancing;
+        switch (loadBalancing) {
             case LB_TYPES.RR:
                 this._loadBalancer = new RoundRobinLB();
                 break;
@@ -41,18 +41,36 @@ class VirtualHost {
         }
     }
 
+    /**
+     *
+     * @return {string}
+     */
     get host() {
         return this._host;
     }
 
+    /**
+     *
+     * @param {string} value
+     */
     set host(value) {
         this._host = value;
     }
 
+    /**
+     * Label of virtual host
+     *
+     * @return {string}
+     */
     get name() {
         return this._name;
     }
 
+    /**
+     * Define new label for virtual host
+     *
+     * @param {string} value
+     */
     set name(value) {
         this._name = value;
     }
@@ -62,6 +80,7 @@ class VirtualHost {
     }
 
     /**
+     * Associated upstreams for this virtual host
      *
      * @return {Array<UpstreamHost>}
      */
@@ -70,6 +89,7 @@ class VirtualHost {
     }
 
     /**
+     * Identity of this class
      *
      * @return {string}
      */
@@ -78,6 +98,7 @@ class VirtualHost {
     }
 
     /**
+     * Check if this virtual host is based on a regex match
      *
      * @return {boolean}
      */
@@ -87,6 +108,8 @@ class VirtualHost {
 
 
     /**
+     * Find next available upstream node
+     * using defined load balancing policy
      *
      * @return {UpstreamHost}
      */
@@ -96,6 +119,7 @@ class VirtualHost {
 
 
     /**
+     * Test if argument is this entity
      *
      * @param hostHeaderValue
      * @return {boolean}
@@ -109,6 +133,7 @@ class VirtualHost {
     }
 
     /**
+     * To JSON object
      *
      * @return {string}
      */
@@ -122,6 +147,7 @@ class VirtualHost {
     }
 
     /**
+     * Deserialize instance from redis
      *
      * @param {string} data
      */

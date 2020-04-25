@@ -2,6 +2,7 @@ const {Repository} = require('./repository');
 
 /**
  * @class
+ * @extends {Repository}
  */
 class InMemoryRepository extends Repository {
 

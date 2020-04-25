@@ -2,6 +2,7 @@ const {LoadBalancer} = require('./load_balancer');
 
 /**
  * @class
+ * @extends {LoadBalancer}
  */
 class RoundRobinLB extends LoadBalancer {
 

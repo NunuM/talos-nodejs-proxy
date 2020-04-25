@@ -10,7 +10,7 @@ const {LOGGER} = require('../service/logger_service');
 class HealthCheckService {
 
     /**
-     *
+     * @constructor
      * @param {VirtualHostService} virtualHostService
      */
     constructor(virtualHostService) {
@@ -18,6 +18,7 @@ class HealthCheckService {
     }
 
     /**
+     * Get virtual host service
      *
      * @return {VirtualHostService}
      */
@@ -25,6 +26,13 @@ class HealthCheckService {
         return this._virtualHostService;
     }
 
+    /**
+     * Never returning function that
+     * pulls upstream state by establish
+     * a socket connection with upstreams.
+     *
+     * @return {Promise<void>}
+     */
     async startHealthCheck() {
 
         while (true) {

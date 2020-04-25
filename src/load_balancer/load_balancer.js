@@ -1,9 +1,15 @@
+/**
+ * @abstract
+ * @class
+ */
 class LoadBalancer {
 
     /**
+     * Retrieve next available host
+     *
      * @abstract
      * @param {Array<UpstreamHost>} upstreams
-     * @return {UpstreamHost}
+     * @return {UpstreamHost|null}
      */
     nextHost(upstreams) {
         throw new Error('Must be implemented');

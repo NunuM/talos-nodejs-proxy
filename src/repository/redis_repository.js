@@ -4,6 +4,10 @@ const {Repository} = require('./repository');
 const {VirtualHost} = require('../model/virtual_host');
 const {LOGGER} = require('../service/logger_service');
 
+/**
+ * @class
+ * @extends {Repository}
+ */
 class RedisRepository extends Repository {
 
     /**

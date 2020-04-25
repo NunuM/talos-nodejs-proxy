@@ -5,6 +5,10 @@ const redis = require('redis');
 const {Config} = require('../app/config');
 const {LOGGER} = require('../service/logger_service');
 
+/**
+ *
+ * @type {RedisClient}
+ */
 const client = redis.createClient({
     url: Config.redisConnectionString(),
     retry_strategy: function (options) {

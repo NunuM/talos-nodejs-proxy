@@ -1,4 +1,6 @@
 /**
+ * Types of load balancing policies
+ *
  * @enum
  * @readonly
  * @type {{RR: number, FF: number}}

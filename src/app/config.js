@@ -44,49 +44,95 @@ const LOG_ACCESS_FORMAT = process.env.TLP_LOG_ACCESS_FORMAT || config.logAccessF
 
 const LOG_FORMAT = process.env.TLP_LOG_FORMAT || config.loggingFormat || '%[[%d]%] %[[%p]%] %[[%c]%] - %m';
 
-
+/**
+ * @class
+ */
 class Config {
 
+    /**
+     * Redis connect string
+     * @link {https://www.iana.org/assignments/uri-schemes/prov/redis}
+     * @return {string}
+     */
     static redisConnectionString() {
         return REDIS_CONNECTION_STRING;
     }
 
+    /**
+     * Proxy server port
+     *
+     * @return {number}
+     */
     static serverPort() {
         return SERVER_PORT;
     }
 
+    /**
+     * Proxy server admin port
+     *
+     * @return {number}
+     */
     static serverAdminUIPort() {
         return SERVER_ADMIN_PORT;
     }
 
+    /**
+     * Repository to be used as persistence layer
+     *
+     * @return {string}
+     */
     static repository() {
         return APP_REPOSITORY;
     }
 
     /**
-     * In base64
+     * Password in base64
      * @return {string}
      */
     static serverAdminPassword() {
         return SERVER_ADMIN_PASSWORD;
     }
 
+    /**
+     * Directory for access log
+     * @return {string}
+     */
     static accessLogLoggerDirectory() {
         return LOG_DIRECTORY
     }
 
+    /**
+     * Log level
+     *
+     * @return {string}
+     */
     static loggingLevel() {
         return LOG_LEVEL;
     }
 
+    /**
+     * Access log format
+     *
+     * @return {string}
+     */
     static logAccessFormat() {
         return LOG_ACCESS_FORMAT;
     }
 
+    /**
+     * Log format
+     *
+     * @return {string}
+     */
     static loggingFormat() {
         return LOG_FORMAT;
     }
 
+    /**
+     * Email connection settings
+     *
+     * @return {{smtp: string | string, recipients: string[], subject: string}}
+     */
     static email() {
         return {
             smtp: SMTP_SERVER,

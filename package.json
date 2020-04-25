@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "node main.js"
+    "start": "node main.js",
+    "generate-docs": "jsdoc -c jsdoc.json"
   },
   "author": "Nunu",
   "license": "ISC",
@@ -24,6 +25,8 @@
     "@log4js-node/smtp": "^1.1.0"
   },
   "devDependencies": {
+    "docdash": "^1.2.0",
+    "jsdoc": "^3.6.4",
     "madge": "^3.8.0",
     "mocha": "^7.1.0"
   }

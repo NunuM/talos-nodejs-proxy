@@ -16,39 +16,64 @@ class ResponseStats {
         this._date = new Date()
     }
 
+    /**
+     * Status code
+     * @return {number}
+     */
     get status() {
         return this._status;
     }
 
+    /**
+     * Set status code
+     * @param {number} value
+     */
     set status(value) {
         this._status = value;
     }
 
+    /**
+     * Time taken to serve the request (milliseconds)
+     * @return {number}
+     */
     get timing() {
         return this._timing;
     }
 
     /**
-     *
+     * Request served date
      * @return {Date}
      */
     get date() {
         return this._date;
     }
 
+    /**
+     * Set request duration
+     * @param {number} value
+     */
     set timing(value) {
         this._timing = value;
     }
 
+    /**
+     * Virtual host
+     * @return {string}
+     */
     get vHost() {
         return this._vHost;
     }
 
+    /**
+     * Set virtual host
+     * @param {string} value
+     */
     set vHost(value) {
         this._vHost = value;
     }
 
     /**
+     * Status code request key
      *
      * @return {string}
      */
@@ -57,6 +82,7 @@ class ResponseStats {
     }
 
     /**
+     * Latency request key
      *
      * @return {string}
      */
@@ -65,6 +91,7 @@ class ResponseStats {
     }
 
     /**
+     * Total requests key
      *
      * @return {string}
      */
@@ -73,6 +100,7 @@ class ResponseStats {
     }
 
     /**
+     * Last request timestamp
      *
      * @return {string}
      */
@@ -81,7 +109,7 @@ class ResponseStats {
     }
 
     /**
-     *
+     * To JSON object
      * @return {string}
      */
     toJSON() {

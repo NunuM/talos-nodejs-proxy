@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>main.js - Talos NodeJS Reverse Proxy</title>
+    
+    
+    
+        <meta name="keywords" content="reverse proxy, proxy, nodejs, web admin, hot reload, load balancing" />
+        <meta name="keyword" content="reverse proxy, proxy, nodejs, web admin, hot reload, load balancing" />
+    
+    
+    
+    <meta property="og:title" content="Talos NodeJS Reverse Proxy"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:image" content=""/>
+    <meta property="og:site_name" content="Talos NodeJS Reverse Proxy"/>
+    <meta property="og:url" content="https://talos.sh"/>
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Config.html">Config</a><ul class='methods'><li data-type='method'><a href="Config.html#.accessLogLoggerDirectory">accessLogLoggerDirectory</a></li><li data-type='method'><a href="Config.html#.email">email</a></li><li data-type='method'><a href="Config.html#.logAccessFormat">logAccessFormat</a></li><li data-type='method'><a href="Config.html#.loggingFormat">loggingFormat</a></li><li data-type='method'><a href="Config.html#.loggingLevel">loggingLevel</a></li><li data-type='method'><a href="Config.html#.redisConnectionString">redisConnectionString</a></li><li data-type='method'><a href="Config.html#.repository">repository</a></li><li data-type='method'><a href="Config.html#.serverAdminPassword">serverAdminPassword</a></li><li data-type='method'><a href="Config.html#.serverAdminUIPort">serverAdminUIPort</a></li><li data-type='method'><a href="Config.html#.serverPort">serverPort</a></li></ul></li><li><a href="FirstFreeLB.html">FirstFreeLB</a><ul class='methods'><li data-type='method'><a href="FirstFreeLB.html#nextHost">nextHost</a></li></ul></li><li><a href="HealthCheckService.html">HealthCheckService</a><ul class='methods'><li data-type='method'><a href="HealthCheckService.html#startHealthCheck">startHealthCheck</a></li></ul></li><li><a href="InMemoryRepository.html">InMemoryRepository</a><ul class='methods'><li data-type='method'><a href="InMemoryRepository.html#loadStats">loadStats</a></li><li data-type='method'><a href="InMemoryRepository.html#loadVirtualHosts">loadVirtualHosts</a></li><li data-type='method'><a href="InMemoryRepository.html#removeVirtualHost">removeVirtualHost</a></li><li data-type='method'><a href="InMemoryRepository.html#saveResponseStatus">saveResponseStatus</a></li><li data-type='method'><a href="InMemoryRepository.html#saveVirtualHost">saveVirtualHost</a></li></ul></li><li><a href="LoadBalancer.html">LoadBalancer</a><ul class='methods'><li data-type='method'><a href="LoadBalancer.html#nextHost">nextHost</a></li></ul></li><li><a href="RedisRepository.html">RedisRepository</a><ul class='methods'><li data-type='method'><a href="RedisRepository.html#loadStats">loadStats</a></li><li data-type='method'><a href="RedisRepository.html#loadVirtualHosts">loadVirtualHosts</a></li><li data-type='method'><a href="RedisRepository.html#removeVirtualHost">removeVirtualHost</a></li><li data-type='method'><a href="RedisRepository.html#saveResponseStatus">saveResponseStatus</a></li><li data-type='method'><a href="RedisRepository.html#saveVirtualHost">saveVirtualHost</a></li></ul></li><li><a href="Repository.html">Repository</a><ul class='methods'><li data-type='method'><a href="Repository.html#loadStats">loadStats</a></li><li data-type='method'><a href="Repository.html#loadVirtualHosts">loadVirtualHosts</a></li><li data-type='method'><a href="Repository.html#removeVirtualHost">removeVirtualHost</a></li><li data-type='method'><a href="Repository.html#saveResponseStatus">saveResponseStatus</a></li><li data-type='method'><a href="Repository.html#saveVirtualHost">saveVirtualHost</a></li></ul></li><li><a href="ResponseStats.html">ResponseStats</a><ul class='methods'><li data-type='method'><a href="ResponseStats.html#lastRequestDateKey">lastRequestDateKey</a></li><li data-type='method'><a href="ResponseStats.html#latencyKey">latencyKey</a></li><li data-type='method'><a href="ResponseStats.html#statusCounterKey">statusCounterKey</a></li><li data-type='method'><a href="ResponseStats.html#toJSON">toJSON</a></li><li data-type='method'><a href="ResponseStats.html#totalNumberOfRequestKey">totalNumberOfRequestKey</a></li></ul></li><li><a href="RoundRobinLB.html">RoundRobinLB</a><ul class='methods'><li data-type='method'><a href="RoundRobinLB.html#nextHost">nextHost</a></li></ul></li><li><a href="UpstreamHost.html">UpstreamHost</a><ul class='methods'><li data-type='method'><a href="UpstreamHost.html#toJSON">toJSON</a></li></ul></li><li><a href="VirtualHost.html">VirtualHost</a><ul class='methods'><li data-type='method'><a href="VirtualHost.html#.fromRedis">fromRedis</a></li><li data-type='method'><a href="VirtualHost.html#key">key</a></li><li data-type='method'><a href="VirtualHost.html#matchHost">matchHost</a></li><li data-type='method'><a href="VirtualHost.html#nextUpstream">nextUpstream</a></li><li data-type='method'><a href="VirtualHost.html#toJSON">toJSON</a></li></ul></li><li></li><li><a href="VirtualHostService.html">VirtualHostService</a><ul class='methods'><li data-type='method'><a href="VirtualHostService.html#addVirtualHost">addVirtualHost</a></li><li data-type='method'><a href="VirtualHostService.html#removeVirtualHostByKey">removeVirtualHostByKey</a></li><li data-type='method'><a href="VirtualHostService.html#requestServed">requestServed</a></li><li data-type='method'><a href="VirtualHostService.html#resolveVirtualHost">resolveVirtualHost</a></li><li data-type='method'><a href="VirtualHostService.html#virtualHosts">virtualHosts</a></li></ul></li></ul><h3>Events</h3><ul><li><a href="virtualHosts.html#event:delete">delete</a></li><li><a href="VirtualHostService.html#event:host">host</a></li><li><a href="VirtualHostService.html#event:stats">stats</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ACCESS_LOG">ACCESS_LOG</a></li><li><a href="global.html#client">client</a></li><li><a href="global.html#config">config</a></li><li><a href="global.html#LB_TYPES">LB_TYPES</a></li><li><a href="global.html#log4js">log4js</a></li><li><a href="global.html#LOGGER">LOGGER</a></li><li><a href="global.html#path">path</a></li><li><a href="global.html#proxyServer">proxyServer</a></li><li><a href="global.html#redis">redis</a></li><li><a href="global.html#REDIS_KEYS">REDIS_KEYS</a></li><li><a href="global.html#util">util</a></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">main.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>const http = require('http');
+const fs = require('fs');
+const pathJS = require('path');
+
+const {manager, repository} = require('./src/app/bootstrap');
+const {LOGGER, _, handler} = require('./src/service/logger_service');
+const {VirtualHost} = require('./src/model/virtual_host');
+const {UpstreamHost} = require('./src/model/upstream_host');
+const {Config} = require('./src/app/config');
+const PORT = Config.serverPort();
+const ADMIN_PORT = Config.serverAdminUIPort();
+
+console.log(`
+  _____     _             ____                      
+ |_   _|_ _| | ___  ___  |  _ \\ _ __ _____  ___   _ 
+   | |/ _\` | |/ _ \\/ __| | |_) | '__/ _ \\ \\/ / | | |
+   | | (_| | | (_) \\__ \\ |  __/| | | (_) >  &lt;| |_| |
+   |_|\\__,_|_|\\___/|___/ |_|   |_|  \\___/_/\\_\\\\__, |
+                                              |___/ 
+`);
+
+const DEFAULT_NEXT = function () {
+};
+
+/**
+ * Proxy server
+ * @type {Server}
+ */
+const proxyServer = http.createServer((proxyRequest, proxyResponse) => {
+
+    const start = new Date();
+
+    handler(proxyRequest, proxyResponse, DEFAULT_NEXT);
+
+    const clientHeader = (proxyRequest.headers['host'] || '').trim().toLowerCase();
+
+    manager
+        .resolveVirtualHost(clientHeader)
+        .then((virtualHost) => {
+            if (virtualHost) {
+
+                const server = virtualHost.nextUpstream();
+
+                if (server) {
+
+                    const options = {
+                        hostname: server.host,
+                        port: server.port,
+                        path: proxyRequest.url,
+                        method: proxyRequest.method,
+                        headers: proxyRequest.headers
+                    };
+
+                    let virtualHostRequest = http.request(options, (virtualHostResponse) => {
+
+                        proxyResponse.writeHead(virtualHostResponse.statusCode, virtualHostResponse.headers);
+
+                        virtualHostResponse.pipe(proxyResponse);
+
+                        virtualHostResponse.on('end', () => {
+                            proxyResponse.end();
+                        });
+                    });
+
+                    proxyRequest.pipe(virtualHostRequest);
+
+                    proxyRequest.on('end', () => {
+                        virtualHostRequest.end();
+                    });
+
+                    virtualHostRequest.on('error', (e) => {
+                        LOGGER.error("problem with request", clientHeader, server, e);
+                        proxyResponse.writeHead(503);
+                        proxyResponse.end();
+                    });
+
+                    proxyResponse.on('finish', () => {
+
+                        const responseTiming = new Date() - start;
+
+                        manager.requestServed(proxyResponse.statusCode, responseTiming, clientHeader);
+
+                    });
+
+                } else {
+                    LOGGER.error('Not upstream host available', clientHeader, virtualHost);
+                    proxyResponse.writeHead(503);
+                    proxyResponse.end();
+                }
+
+            } else {
+                proxyResponse.end();
+            }
+        })
+        .catch((error) => {
+            LOGGER.error("Error resolving host", clientHeader, error);
+            proxyResponse.end();
+        });
+
+}).on('clientError', (err, socket) => {
+    socket.end();
+}).on('connection', (connection) => {
+    LOGGER.debug(`Receive new connection with remote IP: ${connection.remoteAddress}`);
+}).on('error', (e) => {
+    LOGGER.error(`Occurred an error on proxy server: ${e.message}`);
+    proxyServer.close();
+}).listen(PORT, () => {
+    LOGGER.info(`Server is running at: ${PORT}`);
+});
+
+
+http.createServer(
+    (req, res) => {
+
+        handler(req, res, DEFAULT_NEXT);
+
+        if (req.headers.authorization
+            &amp;&amp; `Basic ${Config.serverAdminPassword()}` === req.headers.authorization) {
+
+            const path = req.url || '/';
+
+            if (path === '/' || path.startsWith('/index.html') ) {
+
+                res.writeHead(200, {
+                    'content-type': 'text/html',
+                    'Set-Cookie': 'password=' + Config.serverAdminPassword()
+                });
+
+                fs.createReadStream(pathJS.join(__dirname, "ui", "index.html")).pipe(res);
+
+            } else if (path.startsWith('/api/vhost')) {
+
+                if (req.method === 'PUT') {
+                    let payload = '';
+                    req.on('data', (chunk) => {
+                        payload += chunk.toString();
+                    });
+
+                    req.on('end', () => {
+                        try {
+                            const newVHost = JSON.parse(payload);
+
+                            LOGGER.info('Inserting vHost', newVHost);
+
+                            manager.addVirtualHost(new VirtualHost(newVHost.host.trim().toLowerCase(),
+                                newVHost.name.trim(),
+                                Number(newVHost.lb),
+                                newVHost.upstreamHosts
+                                    .map((u) => new UpstreamHost(u.host, u.port))
+                            ));
+
+                            res.end();
+                        } catch (e) {
+                            res.writeHead(400);
+                            res.end();
+                        }
+                    });
+                } else if (req.method === 'DELETE') {
+
+                    const parts = req.url.split('=');
+
+                    if (parts.length >= 2) {
+                        const host = parts[1];
+                        LOGGER.info('Deleting host', host);
+                        manager.removeVirtualHostByKey(host);
+                        res.end();
+                    } else {
+                        res.writeHead(400);
+                        res.end();
+                    }
+
+                } else {
+                    res.writeHead(200, {'content-type': 'application/json'});
+
+                    res.end(JSON.stringify(manager.virtualHosts().map(e => e.toJSON())));
+                }
+
+            } else if (path.startsWith('/api/stats')) {
+
+                repository
+                    .loadStats()
+                    .then((result) => {
+                        res.writeHead(200, {'content-type': 'application/json'});
+                        res.end(JSON.stringify(result));
+                    })
+                    .catch((err) => {
+                        res.writeHead(500);
+                        res.end();
+                    })
+
+            } else {
+                res.writeHead(404);
+                res.end();
+            }
+        } else {
+
+            res.writeHead(401, {'WWW-Authenticate': 'Basic realm="User Visible Realm", charset="UTF-8"'});
+            res.end();
+
+        }
+    })
+    .listen(ADMIN_PORT, () => {
+        LOGGER.info(`Admin WebUI is running at: ${ADMIN_PORT}`);
+    });
+
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.4</a> on Sat Apr 25 2020 17:18:53 GMT+0100 (Western European Summer Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+
+
+</body>
+</html>

@@ -21,10 +21,16 @@ if(Config.repository() === 'redis') {
 
     repository = new RedisRepository(redis);
 
+    /**
+     * @listens VirtualHostService#host
+     */
     manager.on('host', (vHost) => {
         repository.saveVirtualHost(vHost);
     });
 
+    /**
+     * @listens VirtualHostService#delete
+     */
     manager.on('delete', (host) => {
         repository.removeVirtualHost(host);
     });
@@ -51,6 +57,9 @@ if(Config.repository() === 'redis') {
     repository = new InMemoryRepository();
 }
 
+/**
+ * @listens VirtualHostService#stats
+ */
 manager.on('stats', (record) => {
     repository.saveResponseStatus(record);
 });

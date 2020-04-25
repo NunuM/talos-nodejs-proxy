@@ -32,7 +32,7 @@ const proxyServer = http.createServer((proxyRequest, proxyResponse) => {
 
     handler(proxyRequest, proxyResponse, DEFAULT_NEXT);
 
-    const clientHeader = proxyRequest.headers['host'] || '';
+    const clientHeader = (proxyRequest.headers['host'] || '').trim().toLowerCase();
 
     manager
         .resolveVirtualHost(clientHeader)
@@ -117,7 +117,7 @@ http.createServer(
         if (req.headers.authorization
             && `Basic ${Config.serverAdminPassword()}` === req.headers.authorization) {
 
-            const path = req.url || '';
+            const path = req.url || '/';
 
             if (path === '/' || path.startsWith('/index.html') ) {
 
@@ -142,10 +142,11 @@ http.createServer(
 
                             LOGGER.info('Inserting vHost', newVHost);
 
-                            manager.addVirtualHost(new VirtualHost(newVHost.host,
-                                newVHost.name,
+                            manager.addVirtualHost(new VirtualHost(newVHost.host.trim().toLowerCase(),
+                                newVHost.name.trim(),
                                 Number(newVHost.lb),
-                                newVHost.upstreamHosts.map((u) => new UpstreamHost(u.host, u.port))
+                                newVHost.upstreamHosts
+                                    .map((u) => new UpstreamHost(u.host, u.port))
                             ));
 
                             res.end();
@@ -161,7 +162,7 @@ http.createServer(
                     if (parts.length >= 2) {
                         const host = parts[1];
                         LOGGER.info('Deleting host', host);
-                        manager.removeVirtualHostBykey(host);
+                        manager.removeVirtualHostByKey(host);
                         res.end();
                     } else {
                         res.writeHead(400);
