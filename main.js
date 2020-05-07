@@ -1,14 +1,20 @@
-const http = require('http');
+/** node packages */
 const fs = require('fs');
+const http = require('http');
 const pathJS = require('path');
 
+
+/** project imports */
 const {manager, repository} = require('./src/app/bootstrap');
 const {LOGGER, _, handler} = require('./src/service/logger_service');
 const {VirtualHost} = require('./src/model/virtual_host');
 const {UpstreamHost} = require('./src/model/upstream_host');
 const {Config} = require('./src/app/config');
+
+
 const PORT = Config.serverPort();
 const ADMIN_PORT = Config.serverAdminUIPort();
+
 
 console.log(`
   _____     _             ____                      
@@ -119,7 +125,7 @@ http.createServer(
 
             const path = req.url || '/';
 
-            if (path === '/' || path.startsWith('/index.html') ) {
+            if (path === '/' || path.startsWith('/index.html')) {
 
                 res.writeHead(200, {
                     'content-type': 'text/html',

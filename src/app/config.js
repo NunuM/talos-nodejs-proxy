@@ -1,4 +1,5 @@
 /** node imports */
+const fs = require('fs');
 const path = require('path');
 
 /** package imports */
@@ -30,6 +31,14 @@ const REDIS_CONNECTION_STRING = process.env.TLP_REDIS_CONNECTION_STRING || confi
 const SMTP_SERVER = process.env.TLP_SMTP_SERVER || config.smtpServer || '';
 
 const ERROR_EMAIL_RECIPIENTS = process.env.TLP_ERROR_EMAIL_RECIPIENTS || config.errorEmailRecipients || '';
+
+let ERROR_EMAIL_TEMPLATE;
+
+try {
+    ERROR_EMAIL_TEMPLATE = fs.readFileSync(process.env.ERROR_EMAIL_TEMPLATE || config.errorEmailTemplateFile).toString();
+} catch (e) {
+    ERROR_EMAIL_TEMPLATE = null;
+}
 
 
 /*********************
@@ -139,6 +148,14 @@ class Config {
             recipients: ERROR_EMAIL_RECIPIENTS.split(','),
             subject: ' Proxy - Error Log',
         }
+    }
+
+    /**
+     *
+     * @return {string|null}
+     */
+    static emailHtmlTemplate() {
+        return ERROR_EMAIL_TEMPLATE;
     }
 }
 
