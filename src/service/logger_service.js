@@ -9,7 +9,7 @@ const log4js = require('log4js');
 const {Config} = require('../app/config');
 
 
-log4js.addLayout('email', function (config) {
+log4js.addLayout('email', function () {
     return function (logEvent) {
         let emailTemplate;
 
@@ -30,7 +30,7 @@ log4js.addLayout('email', function (config) {
                 .replace(":data", `${data}`);
         }
 
-        return JSON.stringify(logEvent) + config.separator;
+        return util.format(logEvent.data);
     }
 });
 
