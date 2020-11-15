@@ -14,7 +14,7 @@
   "sslKey": "./ssl/key3.pem",
   "sslCert": "./ssl/cert3.pem",
   "serverAdminUIPort": 7777,
-  "serverAdminPassword": "cm9vdDpyb290",
+  "serverAdminPassword": "root",
   "repository": "memory",
   "redisConnectionString": "[redis[s]:]//[[user][:password@]][host][:port][/db-number][?db=db-number[&password=bar[&option=value]]]"
 }

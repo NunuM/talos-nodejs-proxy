@@ -39,16 +39,22 @@ config.json. You can point a new file by defining the env var *TLP_CONF_FILE*.
 ```json
 {
   "appId": "proxy",
-  "smtpServer": "test.com",
-  "errorEmailRecipients": "test@test.com",
+  "smtpServer": "smtp.nunum.me",
+  "errorEmailRecipients": "proxy@talos.sh",
+  "errorEmailTemplateFile" : "./template/email.html",
   "logDirectory": "./",
   "logAccessFormat": ":remote-addr - \":method :url HTTP/:http-version\" :status :content-length \":referrer\" \":user-agent\" :response-time",
   "loggingFormat": "%[%[[%p]%] %[[%c]%] - %m",
   "logLevel": "info",
+  "withHttp": true,
+  "withHttps": true,
   "serverPort": 8000,
+  "serverHttpsPort": 8001,
+  "sslKey": "./ssl/key3.pem",
+  "sslCert": "./ssl/cert3.pem",
   "serverAdminUIPort": 7777,
-  "serverAdminPassword": "cm9vdDpyb290",
-  "repository": "memory|redis", 
+  "serverAdminPassword": "root",
+  "repository": "memory",
   "redisConnectionString": "[redis[s]:]//[[user][:password@]][host][:port][/db-number][?db=db-number[&password=bar[&option=value]]]"
 }
 ```
