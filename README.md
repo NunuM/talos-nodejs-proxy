@@ -1,7 +1,7 @@
 ### Talos HTTP Proxy
 
 This proxy forwards HTTP requests based on the host header to the user-defined upstreams. One host can have multiple 
-upstreams. Currently supports:
+upstreams. Currently supports (per upstream):
  
  * HTTP -> HTTP
  * HTTP -> HTTPS
@@ -58,7 +58,7 @@ config.json. You can point a new file by defining the env var *TLP_CONF_FILE*.
   "sslKey": "./ssl/key3.pem",
   "sslCert": "./ssl/cert3.pem",
   "serverAdminUIPort": 7777,
-  "serverAdminPassword": "root",
+  "serverAdminPassword": "cm9vdDpyb290",
   "repository": "memory",
   "redisConnectionString": "[redis[s]:]//[[user][:password@]][host][:port][/db-number][?db=db-number[&password=bar[&option=value]]]"
 }
