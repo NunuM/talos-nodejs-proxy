@@ -56,7 +56,8 @@ const proxyHandler = (proxyRequest, proxyResponse) => {
                         headers: proxyRequest.headers
                     };
 
-                    let virtualHostRequest = http.request(options, (virtualHostResponse) => {
+
+                    let virtualHostRequest = (server.isOverHTTPS ? https : http).request(options, (virtualHostResponse) => {
 
                         proxyResponse.writeHead(virtualHostResponse.statusCode, virtualHostResponse.headers);
 
@@ -192,7 +193,7 @@ http.createServer(
                                 newVHost.name.trim(),
                                 Number(newVHost.lb),
                                 newVHost.upstreamHosts
-                                    .map((u) => new UpstreamHost(u.host, u.port))
+                                    .map((u) => new UpstreamHost(u.host, u.port, true, u.hasHttps))
                             ));
 
                             res.end();

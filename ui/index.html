@@ -111,6 +111,13 @@
                                     <input type="number" ng-model="up.port">
                                 </md-input-container>
 
+                                <md-input-container>
+                                    <md-switch class="md-primary" ng-model="up.hasHttps" required>
+                                        HTTPS
+                                    </md-switch>
+                                </md-input-container>
+
+
                                 <md-button ng-click="deleteUpstreamFromForm($event, v, up)">Delete</md-button>
                             </div>
 
@@ -216,6 +223,10 @@
 
                                         <p class="md-secondary">
                                             Alive: {{ upstream.isAlive }}
+                                        </p>
+
+                                        <p class="md-secondary">
+                                            HTTPS: {{ upstream.isHTTPS }}
                                         </p>
 
                                     </md-list-item>
