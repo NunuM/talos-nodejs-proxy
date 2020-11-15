@@ -1,7 +1,7 @@
 ### Talos HTTP Proxy
 
 This proxy forwards HTTP requests based on the host header to the user-defined upstreams. One host can have multiple 
-upstreams. Currently only HTTP -> HTTP is supported.
+upstreams. Currently only HTTP/HTTPS -> HTTP is supported.
  
 This proxy is being used on [Talos Fog Computing platform](https://talos.sh)
 
