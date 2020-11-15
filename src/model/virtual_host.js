@@ -1,3 +1,6 @@
+/** node imports */
+const vm = require('vm');
+
 /** project imports */
 const {UpstreamHost} = require('./upstream_host');
 const {LOGGER} = require('../service/logger_service');

@@ -24,6 +24,16 @@ const APP_REPOSITORY = process.env.TLP_APP_REPOSITORY || config.repository || 'm
 
 const REDIS_CONNECTION_STRING = process.env.TLP_REDIS_CONNECTION_STRING || config.redisConnectionString || '';
 
+const SERVER_HTTPS_PORT = process.env.TLP_SERVER_HTTPS_PORT || config.serverHttpsPort || 8081;
+
+const SSL_KEY = process.env.TLP_SSL_KEY || config.sslKey;
+
+const SSL_CERT = process.env.TLP_SSL_KEY || config.sslCert;
+
+const WITH_HTTP = process.env.TLP_WITH_HTTP || config.withHttp || true;
+
+const WITH_HTTPS = process.env.TLP_WITH_HTTPS || config.withHttps || true;
+
 /*********************
  *  Email settings
  *
@@ -74,6 +84,54 @@ class Config {
      */
     static serverPort() {
         return SERVER_PORT;
+    }
+
+    /**
+     * Start server for HTTP
+     *
+     * @return {boolean}
+     */
+    static withHttp() {
+        return WITH_HTTP
+    }
+
+
+    /**
+     * Start server for HTTPS
+     *
+     * @return {boolean}
+     */
+    static withHttps() {
+        return WITH_HTTPS
+    }
+
+    /**
+     * HTTPS port
+     *
+     * @return {number}
+     */
+    static serverHttpsPort() {
+        return SERVER_HTTPS_PORT;
+    }
+
+    /**
+     * Get SSL key
+     *
+     * @return {Buffer}
+     * @throws {Error} if key does not exists
+     */
+    static sslKey() {
+        return fs.readFileSync(SSL_KEY);
+    }
+
+    /**
+     * Get SSL cert
+     *
+     * @return {Buffer}
+     * @throws {Error} if cert does not exists
+     */
+    static sslCert() {
+        return fs.readFileSync(SSL_CERT);
     }
 
     /**

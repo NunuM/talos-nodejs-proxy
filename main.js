@@ -1,6 +1,7 @@
 /** node packages */
 const fs = require('fs');
 const http = require('http');
+const https = require('https');
 const pathJS = require('path');
 
 
@@ -13,6 +14,7 @@ const {Config} = require('./src/app/config');
 
 
 const PORT = Config.serverPort();
+const HTTPS_PORT = Config.serverHttpsPort();
 const ADMIN_PORT = Config.serverAdminUIPort();
 
 
@@ -28,11 +30,8 @@ console.log(`
 const DEFAULT_NEXT = function () {
 };
 
-/**
- * Proxy server
- * @type {Server}
- */
-const proxyServer = http.createServer((proxyRequest, proxyResponse) => {
+
+const proxyHandler = (proxyRequest, proxyResponse) => {
 
     const start = new Date();
 
@@ -103,16 +102,57 @@ const proxyServer = http.createServer((proxyRequest, proxyResponse) => {
             proxyResponse.end();
         });
 
-}).on('clientError', (err, socket) => {
-    socket.end();
-}).on('connection', (connection) => {
-    LOGGER.debug(`Receive new connection with remote IP: ${connection.remoteAddress}`);
-}).on('error', (e) => {
-    LOGGER.error(`Occurred an error on proxy server: ${e.message}`);
-    proxyServer.close();
-}).listen(PORT, () => {
-    LOGGER.info(`Server is running at: ${PORT}`);
-});
+};
+
+
+if (Config.withHttp()) {
+
+    /**
+     * Proxy server
+     * @type {Server}
+     */
+    const proxyServer = http.createServer(proxyHandler)
+        .on('clientError', (err, socket) => {
+            socket.end();
+        })
+        .on('connection', (connection) => {
+            LOGGER.debug(`Receive new connection with remote IP: ${connection.remoteAddress}`);
+        })
+        .on('error', (e) => {
+            LOGGER.error(`Occurred an error on proxy server: ${e.message}`);
+            proxyServer.close();
+        })
+        .listen(PORT, () => {
+            LOGGER.info(`HTTP Server is running at: ${PORT}`);
+        });
+}
+
+
+if (Config.withHttps()) {
+
+    /**
+     * Proxy server
+     * @type {Server}
+     */
+    const httpsProxyServer = https.createServer({
+        key: Config.sslKey(),
+        cert: Config.sslCert()
+    }, proxyHandler)
+        .on('clientError', (err, socket) => {
+            socket.end();
+        })
+        .on('connection', (connection) => {
+            LOGGER.debug(`Receive new connection with remote IP: ${connection.remoteAddress}`);
+        })
+        .on('error', (e) => {
+            LOGGER.error(`Occurred an error on proxy server: ${e.message}`);
+            httpsProxyServer.close();
+        })
+        .listen(HTTPS_PORT, () => {
+            LOGGER.info(`HTTPS Server is running at: ${HTTPS_PORT}`);
+        });
+
+}
 
 
 http.createServer(
