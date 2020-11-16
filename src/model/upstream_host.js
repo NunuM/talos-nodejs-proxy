@@ -82,7 +82,7 @@ class UpstreamHost {
      *
      * @param {boolean} value
      */
-    set isHTTPS(value) {
+    set supportHTTPS(value) {
         this._isHTTPS = value;
     }
 
