@@ -69,6 +69,10 @@ class VirtualHostService extends EventEmitter {
      */
     async resolveVirtualHost(hostHeaderValue) {
 
+        if(hostHeaderValue.length === 0) {
+            return null;
+        }
+
         const vHost = this._wellDefinedHosts.get(hostHeaderValue);
 
         if (vHost) {

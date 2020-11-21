@@ -1,8 +1,13 @@
 /** node packages */
 const fs = require('fs');
+const zlib = require('zlib');
 const http = require('http');
 const https = require('https');
 const pathJS = require('path');
+const {pipeline} = require('stream');
+
+/** package imports */
+const Accepts = require('accepts');
 
 
 /** project imports */
@@ -29,7 +34,6 @@ console.log(`
 
 const DEFAULT_NEXT = function () {
 };
-
 
 const proxyHandler = (proxyRequest, proxyResponse) => {
 
@@ -59,13 +63,63 @@ const proxyHandler = (proxyRequest, proxyResponse) => {
 
                     let virtualHostRequest = (server.isOverHTTPS ? https : http).request(options, (virtualHostResponse) => {
 
-                        proxyResponse.writeHead(virtualHostResponse.statusCode, virtualHostResponse.headers);
+                        if (virtualHostResponse.headers["content-encoding"]) {
 
-                        virtualHostResponse.pipe(proxyResponse);
+                            proxyResponse.writeHead(virtualHostResponse.statusCode, virtualHostResponse.headers);
 
-                        virtualHostResponse.on('end', () => {
-                            proxyResponse.end();
-                        });
+                            virtualHostResponse.pipe(proxyResponse);
+
+                        } else {
+
+                            const accepts = Accepts(proxyRequest);
+
+                            const onEncodingError = (err) => {
+                                if (err) {
+                                    proxyResponse.end();
+                                    LOGGER.error('An error occurred:', err);
+                                }
+                            };
+
+                            proxyResponse.setHeader('Vary', 'Accept-Encoding');
+
+
+                            if (accepts.encoding('deflate')) {
+
+                                virtualHostResponse.headers['Content-Encoding'] = 'deflate';
+
+                                delete virtualHostResponse.headers['content-length'];
+
+                                proxyResponse.writeHead(virtualHostResponse.statusCode, virtualHostResponse.headers);
+
+                                pipeline(virtualHostResponse, zlib.createDeflate(), proxyResponse, onEncodingError);
+
+                            } else if (accepts.encoding('gzip')) {
+
+                                virtualHostResponse.headers['Content-Encoding'] = 'gzip';
+
+                                delete virtualHostResponse.headers['content-length'];
+
+                                proxyResponse.writeHead(virtualHostResponse.statusCode, virtualHostResponse.headers);
+
+                                pipeline(virtualHostResponse, zlib.createGzip(), proxyResponse, onEncodingError);
+
+                            } else if (accepts.encoding('br')) {
+
+                                virtualHostResponse.headers['Content-Encoding'] = 'br';
+
+                                delete virtualHostResponse.headers['content-length'];
+
+                                proxyResponse.writeHead(virtualHostResponse.statusCode, virtualHostResponse.headers);
+
+                                pipeline(virtualHostResponse, zlib.createBrotliCompress(), proxyResponse, onEncodingError);
+
+                            } else {
+                                proxyResponse.writeHead(virtualHostResponse.statusCode, virtualHostResponse.headers);
+
+                                virtualHostResponse.pipe(proxyResponse);
+                            }
+                        }
+
                     });
 
                     proxyRequest.pipe(virtualHostRequest);

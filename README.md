@@ -70,6 +70,13 @@ All of the above can e overwritten if the correspondent env var is defined.
 
 * The *serverAdminPassword* is base64 of root:root
 
+
+If you want to visualize the access log with this current config using goacccess
+
+```bash
+./goaccess access.log --log-format='%d %t GMT %h - "%r" %s - %R "%u" %L %v' --date-format='%a, %d %b %Y' --time-format='%H:%M:%S'
+```
+
 #### GUI
 
 default user:root
@@ -77,3 +84,8 @@ default user:root
 default password:root
 
 ![Talos Proxy admin panel](https://i.ibb.co/N72vdDq/Screenshot-2020-04-13-at-23-31-08.png)
+
+
+### 0.0.4
+
+* add content-encoding
