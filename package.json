@@ -28,7 +28,7 @@
   "devDependencies": {
     "docdash": "^1.2.0",
     "jsdoc": "^3.6.4",
-    "madge": "^3.8.0",
+    "madge": "^4.0.1",
     "mocha": "^7.1.0"
   }
 }
