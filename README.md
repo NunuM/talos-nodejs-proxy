@@ -85,6 +85,9 @@ default password:root
 
 ![Talos Proxy admin panel](https://i.ibb.co/N72vdDq/Screenshot-2020-04-13-at-23-31-08.png)
 
+### 0.0.5
+
+* Add text stream support 
 
 ### 0.0.4
 

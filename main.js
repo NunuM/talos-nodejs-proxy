@@ -60,18 +60,25 @@ const proxyHandler = (proxyRequest, proxyResponse) => {
                         headers: proxyRequest.headers
                     };
 
+                    const accepts = Accepts(proxyRequest);
 
                     let virtualHostRequest = (server.isOverHTTPS ? https : http).request(options, (virtualHostResponse) => {
 
-                        if (virtualHostResponse.headers["content-encoding"]) {
+                        if (virtualHostResponse.headers["content-encoding"] || accepts.type("text/event-stream")) {
 
                             proxyResponse.writeHead(virtualHostResponse.statusCode, virtualHostResponse.headers);
+
+                            if ((virtualHostResponse.headers["content-type"] || '').startsWith("text/event-stream")) {
+                                proxyRequest.socket.setTimeout(2147483647);
+                                proxyRequest.socket.on('close', ()=> {
+                                    virtualHostRequest.end();
+                                });
+                                proxyResponse.flushHeaders();
+                            }
 
                             virtualHostResponse.pipe(proxyResponse);
 
                         } else {
-
-                            const accepts = Accepts(proxyRequest);
 
                             const onEncodingError = (err) => {
                                 if (err) {
@@ -100,6 +107,7 @@ const proxyHandler = (proxyRequest, proxyResponse) => {
                                 delete virtualHostResponse.headers['content-length'];
 
                                 proxyResponse.writeHead(virtualHostResponse.statusCode, virtualHostResponse.headers);
+
 
                                 pipeline(virtualHostResponse, zlib.createGzip(), proxyResponse, onEncodingError);
 
@@ -168,7 +176,13 @@ if (Config.withHttp()) {
      */
     const proxyServer = http.createServer(proxyHandler)
         .on('clientError', (err, socket) => {
-            socket.end();
+            LOGGER.error("Client error", err.toString());
+
+            if (err.code === 'ECONNRESET' || !socket.writable) {
+                return;
+            }
+
+            socket.end('HTTP/1.1 588 Bad Request\r\n\r\n');
         })
         .on('connection', (connection) => {
             LOGGER.debug(`Receive new connection with remote IP: ${connection.remoteAddress}`);
@@ -189,24 +203,33 @@ if (Config.withHttps()) {
      * Proxy server
      * @type {Server}
      */
-    const httpsProxyServer = https.createServer({
-        key: Config.sslKey(),
-        cert: Config.sslCert()
-    }, proxyHandler)
-        .on('clientError', (err, socket) => {
-            socket.end();
-        })
-        .on('connection', (connection) => {
-            LOGGER.debug(`Receive new connection with remote IP: ${connection.remoteAddress}`);
-        })
-        .on('error', (e) => {
-            LOGGER.error(`Occurred an error on proxy server: ${e.message}`);
-            httpsProxyServer.close();
-        })
-        .listen(HTTPS_PORT, () => {
-            LOGGER.info(`HTTPS Server is running at: ${HTTPS_PORT}`);
-        });
+    try {
+        const httpsProxyServer = https.createServer({
+            key: Config.sslKey(),
+            cert: Config.sslCert()
+        }, proxyHandler)
+            .on('clientError', (err, socket) => {
+                LOGGER.error("Client https error", err.toString());
 
+                if (err.code === 'ECONNRESET' || !socket.writable) {
+                    return;
+                }
+
+                socket.end('HTTP/1.1 588 Bad Request\r\n\r\n');
+            })
+            .on('connection', (connection) => {
+                LOGGER.debug(`Receive new connection with remote IP: ${connection.remoteAddress}`);
+            })
+            .on('error', (e) => {
+                LOGGER.error(`Occurred an error on proxy server: ${e.message}`);
+                httpsProxyServer.close();
+            })
+            .listen(HTTPS_PORT, () => {
+                LOGGER.info(`HTTPS Server is running at: ${HTTPS_PORT}`);
+            });
+    } catch (e) {
+        LOGGER.error("error starting HTTPS server", e);
+    }
 }
 
 

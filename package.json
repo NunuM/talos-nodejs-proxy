@@ -1,6 +1,6 @@
 {
   "name": "talos-node-proxy",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "private": true,
   "scripts": {
     "start": "node main.js",
@@ -20,15 +20,14 @@
     "type": "git"
   },
   "dependencies": {
+    "@log4js-node/smtp": "^1.1.0",
     "accepts": "^1.3.7",
     "log4js": "^6.1.2",
-    "redis": "^3.0.2",
-    "@log4js-node/smtp": "^1.1.0"
+    "redis": "^3.1.2"
   },
   "devDependencies": {
     "docdash": "^1.2.0",
     "jsdoc": "^3.6.4",
-    "madge": "^3.8.0",
     "mocha": "^7.1.0"
   }
 }

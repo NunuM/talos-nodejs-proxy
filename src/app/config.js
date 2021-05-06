@@ -8,6 +8,7 @@ let config = {};
 try {
     config = require(process.env.TLP_CONF_FILE || path.join(__dirname, '..', '..', 'config'));
 } catch (e) {
+    console.error("Cannot read config file", e);
 }
 
 /*********************
@@ -30,9 +31,9 @@ const SSL_KEY = process.env.TLP_SSL_KEY || config.sslKey;
 
 const SSL_CERT = process.env.TLP_SSL_KEY || config.sslCert;
 
-const WITH_HTTP = process.env.TLP_WITH_HTTP || config.withHttp || true;
+const WITH_HTTP = process.env.TLP_WITH_HTTP || config.withHttp;
 
-const WITH_HTTPS = process.env.TLP_WITH_HTTPS || config.withHttps || true;
+const WITH_HTTPS = process.env.TLP_WITH_HTTPS || config.withHttps;
 
 /*********************
  *  Email settings
@@ -92,7 +93,7 @@ class Config {
      * @return {boolean}
      */
     static withHttp() {
-        return WITH_HTTP
+        return !!(WITH_HTTP);
     }
 
 
@@ -102,7 +103,7 @@ class Config {
      * @return {boolean}
      */
     static withHttps() {
-        return WITH_HTTPS
+        return !!WITH_HTTPS
     }
 
     /**
@@ -121,7 +122,7 @@ class Config {
      * @throws {Error} if key does not exists
      */
     static sslKey() {
-        return fs.readFileSync(SSL_KEY);
+        return fs.readFileSync(SSL_KEY, {encoding: 'utf8'});
     }
 
     /**
@@ -131,7 +132,7 @@ class Config {
      * @throws {Error} if cert does not exists
      */
     static sslCert() {
-        return fs.readFileSync(SSL_CERT);
+        return fs.readFileSync(SSL_CERT, {encoding: 'utf8'});
     }
 
     /**
