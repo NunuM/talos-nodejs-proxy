@@ -9,6 +9,7 @@
   "logLevel": "info",
   "withHttp": true,
   "withHttps": true,
+  "withHttp2": false,
   "serverPort": 8000,
   "serverHttpsPort": 8001,
   "sslKey": "./ssl/key3.pem",
