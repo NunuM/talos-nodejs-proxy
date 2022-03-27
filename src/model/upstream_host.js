@@ -10,12 +10,14 @@ class UpstreamHost {
      * @param {number} port
      * @param {boolean} [isAlive=true]
      * @param {boolean} [isHTTPS=false]
+     * @param {boolean} [isHTTP2=false]
      */
-    constructor(host, port, isAlive, isHTTPS) {
+    constructor(host, port, isAlive, isHTTPS, isHTTP2) {
         this._host = host;
         this._port = port;
         this._isOnline = isAlive || true;
         this._isHTTPS = isHTTPS || false;
+        this._isHTTP2 = isHTTP2 || false
     }
 
     /**
@@ -73,8 +75,16 @@ class UpstreamHost {
      *
      * @return {boolean}
      */
-    get isOverHTTPS() {
+    get isHTTPS() {
         return this._isHTTPS;
+    }
+
+    /**
+     *
+     * @return {boolean}
+     */
+    get isHTTP2() {
+        return this._isHTTP2;
     }
 
     /**
@@ -87,6 +97,15 @@ class UpstreamHost {
     }
 
     /**
+     * Set HTTP2
+     *
+     * @param {boolean} value
+     */
+    set supportHTTPS2(value) {
+        this._isHTTP2 = value;
+    }
+
+    /**
      * To JSON object
      * @return {{host: string, port: number, isAlive: boolean}}
      */
@@ -95,7 +114,8 @@ class UpstreamHost {
             host: this.host,
             port: this.port,
             isAlive: this.isOnline,
-            isHTTPS: this.isOverHTTPS
+            isHTTPS: this.isHTTPS,
+            isHTTP2: this.isHTTP2
         };
     }
 }

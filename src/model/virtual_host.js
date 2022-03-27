@@ -161,7 +161,7 @@ class VirtualHost {
                 const obj = JSON.parse(data);
 
                 obj.upstreamHosts = (obj.upstreamHosts || []).map((proxy) => {
-                    return new UpstreamHost(proxy.host, proxy.port, proxy.isAlive, proxy.isHTTPS);
+                    return new UpstreamHost(proxy.host, proxy.port, proxy.isAlive, proxy.isHTTPS, proxy.isHTTP2);
                 });
 
                 return new VirtualHost(obj.host, obj.name, obj.lb, obj.upstreamHosts);

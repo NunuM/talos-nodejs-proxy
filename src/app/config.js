@@ -35,6 +35,10 @@ const WITH_HTTP = process.env.TLP_WITH_HTTP || config.withHttp;
 
 const WITH_HTTPS = process.env.TLP_WITH_HTTPS || config.withHttps;
 
+const WITH_HTTP2 = process.env.TLP_WITH_HTTP2 || config.withHttp2;
+
+const SOCKET_TIMEOUT = process.env.TLP_SOCKET_TIMEOUT || config.socketTimeout || 30000;
+
 /*********************
  *  Email settings
  *
@@ -104,6 +108,14 @@ class Config {
      */
     static withHttps() {
         return !!WITH_HTTPS
+    }
+
+    /**
+     * Start sever for HTTP2
+     * @return {boolean}
+     */
+    static withHttp2() {
+        return !!WITH_HTTP2;
     }
 
     /**
@@ -194,6 +206,14 @@ class Config {
      */
     static loggingFormat() {
         return LOG_FORMAT;
+    }
+
+    /**
+     * Socket Timeout
+     * @return {number}
+     */
+    static socketInactivityTimeout() {
+        return SOCKET_TIMEOUT;
     }
 
     /**

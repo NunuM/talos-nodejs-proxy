@@ -64,9 +64,6 @@ manager.on('stats', (record) => {
     repository.saveResponseStatus(record);
 });
 
-manager.addVirtualHost(new VirtualHost('test.com', 'test', LB_TYPES.FF, [new UpstreamHost('127.0.0.1', 8090)]));
-
-
 const health = new HealthCheckService(manager);
 health.startHealthCheck().finally();
 

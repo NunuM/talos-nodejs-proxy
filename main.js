@@ -3,12 +3,13 @@ const fs = require('fs');
 const zlib = require('zlib');
 const http = require('http');
 const https = require('https');
+const http2 = require('http2');
 const pathJS = require('path');
 const {pipeline} = require('stream');
+const {HTTP2_HEADER_AUTHORITY} = http2.constants;
 
 /** package imports */
 const Accepts = require('accepts');
-
 
 /** project imports */
 const {manager, repository} = require('./src/app/bootstrap');
@@ -21,6 +22,8 @@ const {Config} = require('./src/app/config');
 const PORT = Config.serverPort();
 const HTTPS_PORT = Config.serverHttpsPort();
 const ADMIN_PORT = Config.serverAdminUIPort();
+
+const STIMEOUT = Config.socketInactivityTimeout();
 
 
 console.log(`
@@ -41,13 +44,20 @@ const proxyHandler = (proxyRequest, proxyResponse) => {
 
     handler(proxyRequest, proxyResponse, DEFAULT_NEXT);
 
-    const clientHeader = (proxyRequest.headers['host'] || '').trim().toLowerCase();
+    let clientHeader = '';
+
+    if (proxyRequest.httpVersion === '2.0') {
+        clientHeader = proxyRequest.headers[HTTP2_HEADER_AUTHORITY];
+    } else {
+        clientHeader = (proxyRequest.headers['host'] || '').trim().toLowerCase()
+    }
 
     manager
         .resolveVirtualHost(clientHeader)
         .then((virtualHost) => {
             if (virtualHost) {
 
+                const abortSignal = new AbortController();
                 const server = virtualHost.nextUpstream();
 
                 if (server) {
@@ -57,20 +67,33 @@ const proxyHandler = (proxyRequest, proxyResponse) => {
                         port: server.port,
                         path: proxyRequest.url,
                         method: proxyRequest.method,
-                        headers: proxyRequest.headers
+                        headers: Object.entries(proxyRequest.headers)
+                            .reduce((acc, [k, v]) => {
+                                if (k.startsWith(':')) {
+                                    return acc;
+                                }
+                                acc[k] = v;
+                                return acc;
+                            }, {}),
+                        timeout: STIMEOUT,
+                        signal: abortSignal.signal
                     };
 
                     const accepts = Accepts(proxyRequest);
 
-                    let virtualHostRequest = (server.isOverHTTPS ? https : http).request(options, (virtualHostResponse) => {
+                    let virtualHostRequest = (server.isHTTPS ? https : http).request(options, (virtualHostResponse) => {
 
                         if (virtualHostResponse.headers["content-encoding"] || accepts.type("text/event-stream")) {
+
+                            if (proxyRequest.httpVersion === '2.0') {
+                                delete virtualHostResponse.headers['connection'];
+                            }
 
                             proxyResponse.writeHead(virtualHostResponse.statusCode, virtualHostResponse.headers);
 
                             if ((virtualHostResponse.headers["content-type"] || '').startsWith("text/event-stream")) {
                                 proxyRequest.socket.setTimeout(2147483647);
-                                proxyRequest.socket.on('close', ()=> {
+                                proxyRequest.socket.on('close', () => {
                                     virtualHostRequest.end();
                                 });
                                 proxyResponse.flushHeaders();
@@ -132,22 +155,29 @@ const proxyHandler = (proxyRequest, proxyResponse) => {
 
                     proxyRequest.pipe(virtualHostRequest);
 
-                    proxyRequest.on('end', () => {
-                        virtualHostRequest.end();
-                    });
-
                     virtualHostRequest.on('error', (e) => {
+                        if (e.code === 'ABORT_ERR') {
+                            return;
+                        }
+
                         LOGGER.error("problem with request", clientHeader, server, e);
                         proxyResponse.writeHead(503);
                         proxyResponse.end();
                     });
 
+                    virtualHostRequest.on('timeout', () => {
+                        LOGGER.info("Timeout");
+                        proxyResponse.writeHead(588, 'Bad Request');
+                        proxyResponse.end();
+                    });
+
+                    proxyRequest.on('close', () => {
+                        abortSignal.abort();
+                    });
+
                     proxyResponse.on('finish', () => {
-
                         const responseTiming = new Date() - start;
-
                         manager.requestServed(proxyResponse.statusCode, responseTiming, clientHeader);
-
                     });
 
                 } else {
@@ -176,7 +206,7 @@ if (Config.withHttp()) {
      */
     const proxyServer = http.createServer(proxyHandler)
         .on('clientError', (err, socket) => {
-            LOGGER.error("Client error", err.toString());
+            LOGGER.error("Client http", err);
 
             if (err.code === 'ECONNRESET' || !socket.writable) {
                 return;
@@ -185,7 +215,7 @@ if (Config.withHttp()) {
             socket.end('HTTP/1.1 588 Bad Request\r\n\r\n');
         })
         .on('connection', (connection) => {
-            LOGGER.debug(`Receive new connection with remote IP: ${connection.remoteAddress}`);
+            LOGGER.info(`Receive new connection with remote IP: ${connection.remoteAddress}`);
         })
         .on('error', (e) => {
             LOGGER.error(`Occurred an error on proxy server: ${e.message}`);
@@ -197,19 +227,28 @@ if (Config.withHttp()) {
 }
 
 
-if (Config.withHttps()) {
+if (Config.withHttps() || Config.withHttp2()) {
 
     /**
      * Proxy server
      * @type {Server}
      */
     try {
-        const httpsProxyServer = https.createServer({
+
+        let fn = https.createServer;
+
+        const options = {
             key: Config.sslKey(),
             cert: Config.sslCert()
-        }, proxyHandler)
+        };
+
+        if (Config.withHttp2()) {
+            fn = http2.createSecureServer;
+            options.allowHTTP1 = true;
+        }
+
+        const httpsProxyServer = fn(options, proxyHandler)
             .on('clientError', (err, socket) => {
-                LOGGER.error("Client https error", err.toString());
 
                 if (err.code === 'ECONNRESET' || !socket.writable) {
                     return;
@@ -218,7 +257,7 @@ if (Config.withHttps()) {
                 socket.end('HTTP/1.1 588 Bad Request\r\n\r\n');
             })
             .on('connection', (connection) => {
-                LOGGER.debug(`Receive new connection with remote IP: ${connection.remoteAddress}`);
+                LOGGER.info(`Receive new connection with remote IP: ${connection.remoteAddress}`);
             })
             .on('error', (e) => {
                 LOGGER.error(`Occurred an error on proxy server: ${e.message}`);

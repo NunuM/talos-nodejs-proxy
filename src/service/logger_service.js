@@ -1,6 +1,7 @@
 /** node imports */
 const path = require('path');
 const util = require('util');
+const {HTTP2_HEADER_AUTHORITY} = require('http2').constants;
 
 /** package imports */
 const log4js = require('log4js');
@@ -9,7 +10,7 @@ const log4js = require('log4js');
 const {Config} = require('../app/config');
 
 
-log4js.addLayout('email', function () {
+log4js.addLayout('email', function (config) {
     return function (logEvent) {
         let emailTemplate;
 
@@ -30,7 +31,7 @@ log4js.addLayout('email', function () {
                 .replace(":data", `${data}`);
         }
 
-        return util.format(logEvent.data);
+        return JSON.stringify(logEvent) + config.separator;
     }
 });
 
@@ -85,7 +86,7 @@ const ACCESS_LOG = log4js.getLogger('proxy');
 
 const handler = log4js.connectLogger(ACCESS_LOG, {
     level: 'auto',
-    format: (req, res, format) => format(Config.logAccessFormat() + ' ' + req.headers['host'])
+    format: (req, res, format) => format(Config.logAccessFormat() + ' ' + (req.headers['host'] || req.headers[HTTP2_HEADER_AUTHORITY]) )
 });
 
 module.exports = {
