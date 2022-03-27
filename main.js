@@ -58,6 +58,10 @@ const proxyHandler = (proxyRequest, proxyResponse) => {
             if (virtualHost) {
 
                 const abortSignal = new AbortController();
+                /**
+                 * Server
+                 * @type {UpstreamHost}
+                 */
                 const server = virtualHost.nextUpstream();
 
                 if (server) {

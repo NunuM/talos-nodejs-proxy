@@ -126,7 +126,7 @@ class VirtualHostService extends EventEmitter {
             const vHost = this._regexBasedHosts.find(v => v.key() === host);
 
             if (vHost) {
-                this._regexBasedHosts.slice(this._regexBasedHosts.indexOf(vHost), 1);
+                this._regexBasedHosts.splice(this._regexBasedHosts.indexOf(vHost), 1);
             }
         }
 
