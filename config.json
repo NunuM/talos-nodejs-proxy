@@ -16,5 +16,6 @@
   "serverAdminUIPort": 7777,
   "serverAdminPassword": "cm9vdDpyb290",
   "repository": "memory",
-  "redisConnectionString": "[redis[s]:]//[[user][:password@]][host][:port][/db-number][?db=db-number[&password=bar[&option=value]]]"
+  "redisConnectionString": "[redis[s]:]//[[user][:password@]][host][:port][/db-number][?db=db-number[&password=bar[&option=value]]]",
+  "socketTimeout": 30000
 }
