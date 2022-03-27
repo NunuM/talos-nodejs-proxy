@@ -1,7 +1,7 @@
 {
   "appId": "proxy",
   "smtpServer": "smtp.nunum.me",
-  "errorEmailRecipients": "proxy@talos.sh",
+  "errorEmailRecipients": "my@email",
   "errorEmailTemplateFile" : "./template/email.html",
   "logDirectory": "./",
   "logAccessFormat": ":remote-addr - \":method :url HTTP/:http-version\" :status :content-length \":referrer\" \":user-agent\" :response-time",
