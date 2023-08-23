@@ -1,12 +1,12 @@
-const assert = require('assert');
-const {RoundRobinLB} = require('../src/load_balancer/round_robin_lb');
-const {UpstreamHost} = require('../src/model/upstream_host');
+import {RoundRobinLoadBalancer} from "../src/load_balancer/round-robin-load-balancer";
+import {UpstreamHost} from "../src/model/upstream-host";
+
 
 describe('Test Round Robin', () => {
 
-    it('Must be give true', () => {
+    test('Must be give true', () => {
 
-        const rr = new RoundRobinLB();
+        const rr = new RoundRobinLoadBalancer();
 
         let upstreams = [];
 
@@ -28,24 +28,23 @@ describe('Test Round Robin', () => {
 
         let result = rr.nextHost(upstreams);
 
-        assert.strictEqual(result, u1, 'Must be the first from array');
+        expect(result).toBe(u1);
 
         result = rr.nextHost(upstreams);
 
-        assert.strictEqual(result, u3, 'Must be the first from array');
+        expect(result).toBe(u3);
 
         u1.isOnline = false;
 
         result = rr.nextHost(upstreams);
 
-        assert.strictEqual(result, u3, 'Must be the first from array');
+        expect(result).toBe(u3);
 
         u3.isOnline = false;
         u1.isOnline = true;
 
         result = rr.nextHost(upstreams);
-        assert.strictEqual(result, u1, 'Must be the first from array');
-
+        expect(result).toBe(u1);
     });
 
 });

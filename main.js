@@ -23,7 +23,7 @@ const PORT = Config.serverPort();
 const HTTPS_PORT = Config.serverHttpsPort();
 const ADMIN_PORT = Config.serverAdminUIPort();
 
-const STIMEOUT = Config.socketInactivityTimeout();
+const STIMEOUT = 2;
 
 
 console.log(`
@@ -45,11 +45,10 @@ const proxyHandler = (proxyRequest, proxyResponse) => {
     handler(proxyRequest, proxyResponse, DEFAULT_NEXT);
 
     let clientHeader = '';
-
     if (proxyRequest.httpVersion === '2.0') {
         clientHeader = proxyRequest.headers[HTTP2_HEADER_AUTHORITY];
     } else {
-        clientHeader = (proxyRequest.headers['host'] || '').trim().toLowerCase()
+        clientHeader = proxyRequest.headers['host']
     }
 
     manager
@@ -171,7 +170,7 @@ const proxyHandler = (proxyRequest, proxyResponse) => {
 
                     virtualHostRequest.on('timeout', () => {
                         LOGGER.info("Timeout");
-                        proxyResponse.writeHead(588, 'Bad Request');
+                        proxyResponse.writeHead(588, 'Bad ServerRequest');
                         proxyResponse.end();
                     });
 
@@ -216,7 +215,7 @@ if (Config.withHttp()) {
                 return;
             }
 
-            socket.end('HTTP/1.1 588 Bad Request\r\n\r\n');
+            socket.end('HTTP/1.1 588 Bad ServerRequest\r\n\r\n');
         })
         .on('connection', (connection) => {
             LOGGER.info(`Receive new connection with remote IP: ${connection.remoteAddress}`);
@@ -258,7 +257,7 @@ if (Config.withHttps() || Config.withHttp2()) {
                     return;
                 }
 
-                socket.end('HTTP/1.1 588 Bad Request\r\n\r\n');
+                socket.end('HTTP/1.1 588 Bad ServerRequest\r\n\r\n');
             })
             .on('connection', (connection) => {
                 LOGGER.info(`Receive new connection with remote IP: ${connection.remoteAddress}`);

@@ -1,13 +1,13 @@
 /** node imports */
-const path = require('path');
-const util = require('util');
-const {HTTP2_HEADER_AUTHORITY} = require('http2').constants;
+import util from "util";
+import path from 'path';
 
 /** package imports */
-const log4js = require('log4js');
+import log4js from 'log4js';
 
 /** project imports */
-const {Config} = require('../app/config');
+import {Config} from '../app/config';
+import http from "http";
 
 
 log4js.addLayout('email', function (config) {
@@ -17,6 +17,10 @@ log4js.addLayout('email', function (config) {
         if ((emailTemplate = Config.emailHtmlTemplate())) {
 
             const date = logEvent.startTime.toISOString().match(/([^T]+)T([^\.]+)/);
+
+            if (!date) {
+                return;
+            }
 
             const context = Object.entries(logEvent.context).reduce(function (acc, [k, v]) {
                 acc += `<tr><td>${k}</td><td>${v}</td></tr>`;
@@ -76,19 +80,15 @@ log4js.configure({
  * @readonly
  * @type {Logger}
  */
-const LOGGER = log4js.getLogger();
+export const LOGGER = log4js.getLogger();
 
 /**
  * @readonly
  * @type {Logger}
  */
-const ACCESS_LOG = log4js.getLogger('proxy');
+export const ACCESS_LOG = log4js.getLogger('proxy');
 
-const handler = log4js.connectLogger(ACCESS_LOG, {
+export const handler = log4js.connectLogger(ACCESS_LOG, {
     level: 'auto',
-    format: (req, res, format) => format(Config.logAccessFormat() + ' ' + (req.headers['host'] || req.headers[HTTP2_HEADER_AUTHORITY]) )
+    format: (req, res, format) => format(Config.logAccessFormat())
 });
-
-module.exports = {
-    LOGGER, ACCESS_LOG, handler
-};

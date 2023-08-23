@@ -1,9 +1,44 @@
 /** node imports */
+import http from "http";
+import https from "https";
+import * as http2 from "http2";
+
 const fs = require('fs');
 const path = require('path');
 
+interface ConfigDefinition {
+
+    withHttp?: boolean,
+    serverHttpPort?: number,
+    serverHttpOptions?: http.ServerOptions,
+
+    withHttps?: boolean,
+    serverHttpsPort?: number,
+    serverHttpsOptions?: https.ServerOptions,
+
+    withHttp2?: boolean,
+    serverHttp2Port?: number,
+    serverHttp2Options?: http2.SecureServerOptions,
+
+    serverAdminUIPort?: number,
+    serverAdminPassword?: string,
+
+    repository?: "memory" | "redis",
+    redisConnectionString?: string,
+
+    smtpServer?: string,
+    errorEmailRecipients?: string,
+    errorEmailTemplateFile?: string,
+
+    logDirectory?: string,
+    logLevel?: string,
+
+    logAccessFormat?: string
+    loggingFormat?: string
+}
+
 /** package imports */
-let config = {};
+let config: ConfigDefinition = {};
 
 try {
     config = require(process.env.TLP_CONF_FILE || path.join(__dirname, '..', '..', 'config'));
@@ -15,7 +50,26 @@ try {
  *  APP settings
  *
  */
-const SERVER_PORT = process.env.TLP_SERVER_PORT || config.serverPort || 8000;
+const WITH_HTTP = process.env.TLP_WITH_HTTP || config.withHttp || false;
+
+const SERVER_HTTP_PORT = process.env.TLP_SERVER_HTTP_PORT || config.serverHttpPort || 8000;
+
+const SERVER_HTTP_OPTIONS = config.serverHttpOptions || {};
+
+
+const WITH_HTTPS = process.env.TLP_WITH_HTTPS || config.withHttps || false;
+
+const SERVER_HTTPS_PORT = process.env.TLP_SERVER_HTTPS_PORT || config.serverHttpsPort || 8081;
+
+const SERVER_HTTPS_OPTIONS = config.serverHttpsOptions || {};
+
+
+const WITH_HTTP2 = process.env.TLP_SERVER_HTTP2_PORT || config.serverHttp2Port || 8082;
+
+const SERVER_HTTP2_PORT = process.env.TLP_SERVER_HTTPS_PORT || config.serverHttp2Port || 8081;
+
+const SERVER_HTTP2_OPTIONS = config.serverHttp2Options || {};
+
 
 const SERVER_ADMIN_PORT = process.env.TLP_SERVER_ADMIN_PORT || config.serverAdminUIPort || 7777;
 
@@ -25,19 +79,6 @@ const APP_REPOSITORY = process.env.TLP_APP_REPOSITORY || config.repository || 'm
 
 const REDIS_CONNECTION_STRING = process.env.TLP_REDIS_CONNECTION_STRING || config.redisConnectionString || '';
 
-const SERVER_HTTPS_PORT = process.env.TLP_SERVER_HTTPS_PORT || config.serverHttpsPort || 8081;
-
-const SSL_KEY = process.env.TLP_SSL_KEY || config.sslKey;
-
-const SSL_CERT = process.env.TLP_SSL_KEY || config.sslCert;
-
-const WITH_HTTP = process.env.TLP_WITH_HTTP || config.withHttp;
-
-const WITH_HTTPS = process.env.TLP_WITH_HTTPS || config.withHttps;
-
-const WITH_HTTP2 = process.env.TLP_WITH_HTTP2 || config.withHttp2;
-
-const SOCKET_TIMEOUT = process.env.TLP_SOCKET_TIMEOUT || config.socketTimeout || 30000;
 
 /*********************
  *  Email settings
@@ -47,7 +88,7 @@ const SMTP_SERVER = process.env.TLP_SMTP_SERVER || config.smtpServer || '';
 
 const ERROR_EMAIL_RECIPIENTS = process.env.TLP_ERROR_EMAIL_RECIPIENTS || config.errorEmailRecipients || '';
 
-let ERROR_EMAIL_TEMPLATE;
+let ERROR_EMAIL_TEMPLATE: string | null;
 
 try {
     ERROR_EMAIL_TEMPLATE = fs.readFileSync(process.env.ERROR_EMAIL_TEMPLATE || config.errorEmailTemplateFile).toString();
@@ -71,24 +112,15 @@ const LOG_FORMAT = process.env.TLP_LOG_FORMAT || config.loggingFormat || '%[[%d]
 /**
  * @class
  */
-class Config {
+export class Config {
 
     /**
      * Redis connect string
      * @link {https://www.iana.org/assignments/uri-schemes/prov/redis}
      * @return {string}
      */
-    static redisConnectionString() {
+    static redisConnectionString(): string {
         return REDIS_CONNECTION_STRING;
-    }
-
-    /**
-     * Proxy server port
-     *
-     * @return {number}
-     */
-    static serverPort() {
-        return SERVER_PORT;
     }
 
     /**
@@ -100,6 +132,21 @@ class Config {
         return !!(WITH_HTTP);
     }
 
+    /**
+     * Proxy server port
+     *
+     * @return {number}
+     */
+    static httpServerPort() {
+        return Number(SERVER_HTTP_PORT);
+    }
+
+    /**
+     * Server options
+     */
+    static httpServerOptions(): http.ServerOptions {
+        return SERVER_HTTP_OPTIONS;
+    }
 
     /**
      * Start server for HTTPS
@@ -111,6 +158,27 @@ class Config {
     }
 
     /**
+     * HTTPS port
+     *
+     * @return {number}
+     */
+    static httpsServerPort() {
+        return Number(SERVER_HTTPS_PORT);
+    }
+
+    /**
+     * Server options
+     */
+    static httpsServerOptions(): https.ServerOptions {
+
+        SERVER_HTTPS_OPTIONS.key = fs.readFileSync(SERVER_HTTPS_OPTIONS.key);
+        SERVER_HTTPS_OPTIONS.cert = fs.readFileSync(SERVER_HTTPS_OPTIONS.cert);
+
+        return SERVER_HTTPS_OPTIONS;
+    }
+
+
+    /**
      * Start sever for HTTP2
      * @return {boolean}
      */
@@ -119,32 +187,23 @@ class Config {
     }
 
     /**
-     * HTTPS port
+     * HTTP2 port
      *
      * @return {number}
      */
-    static serverHttpsPort() {
-        return SERVER_HTTPS_PORT;
+    static http2ServerPort() {
+        return Number(SERVER_HTTP2_PORT);
     }
 
     /**
-     * Get SSL key
-     *
-     * @return {Buffer}
-     * @throws {Error} if key does not exists
+     * Server options
      */
-    static sslKey() {
-        return fs.readFileSync(SSL_KEY, {encoding: 'utf8'});
-    }
+    static http2ServerOptions(): http2.SecureServerOptions {
 
-    /**
-     * Get SSL cert
-     *
-     * @return {Buffer}
-     * @throws {Error} if cert does not exists
-     */
-    static sslCert() {
-        return fs.readFileSync(SSL_CERT, {encoding: 'utf8'});
+        SERVER_HTTP2_OPTIONS.key = fs.readFileSync(SERVER_HTTP2_OPTIONS.key);
+        SERVER_HTTP2_OPTIONS.cert = fs.readFileSync(SERVER_HTTP2_OPTIONS.cert);
+
+        return SERVER_HTTP2_OPTIONS;
     }
 
     /**
@@ -209,14 +268,6 @@ class Config {
     }
 
     /**
-     * Socket Timeout
-     * @return {number}
-     */
-    static socketInactivityTimeout() {
-        return SOCKET_TIMEOUT;
-    }
-
-    /**
      * Email connection settings
      *
      * @return {{smtp: string | string, recipients: string[], subject: string}}
@@ -238,4 +289,3 @@ class Config {
     }
 }
 
-module.exports = {Config};

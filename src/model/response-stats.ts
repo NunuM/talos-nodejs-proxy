@@ -1,7 +1,21 @@
+/** node imports */
+import * as util from "util";
+
+enum KeysSuffix {
+    Latency = 'latency',
+    RequestCounter = 'req',
+    LastRequestDate = 'last'
+}
+
 /**
  * @class
  */
-class ResponseStats {
+export class ResponseStats {
+
+    private _status: number;
+    private _timing: number;
+    private _vHost: string;
+    private readonly _date: Date;
 
     /**
      * @constructor
@@ -9,7 +23,7 @@ class ResponseStats {
      * @param {number} timing
      * @param {string} vHost
      */
-    constructor(status, timing, vHost) {
+    constructor(status: number, timing: number, vHost: string) {
         this._status = status;
         this._timing = timing;
         this._vHost = vHost;
@@ -20,7 +34,7 @@ class ResponseStats {
      * Status code
      * @return {number}
      */
-    get status() {
+    get status(): number {
         return this._status;
     }
 
@@ -28,7 +42,7 @@ class ResponseStats {
      * Set status code
      * @param {number} value
      */
-    set status(value) {
+    set status(value: number) {
         this._status = value;
     }
 
@@ -36,15 +50,15 @@ class ResponseStats {
      * Time taken to serve the request (milliseconds)
      * @return {number}
      */
-    get timing() {
+    get timing(): number {
         return this._timing;
     }
 
     /**
-     * Request served date
+     * request served date
      * @return {Date}
      */
-    get date() {
+    get date(): Date {
         return this._date;
     }
 
@@ -52,7 +66,7 @@ class ResponseStats {
      * Set request duration
      * @param {number} value
      */
-    set timing(value) {
+    set timing(value: number) {
         this._timing = value;
     }
 
@@ -60,7 +74,7 @@ class ResponseStats {
      * Virtual host
      * @return {string}
      */
-    get vHost() {
+    get vHost(): string {
         return this._vHost;
     }
 
@@ -68,7 +82,7 @@ class ResponseStats {
      * Set virtual host
      * @param {string} value
      */
-    set vHost(value) {
+    set vHost(value: string) {
         this._vHost = value;
     }
 
@@ -77,7 +91,7 @@ class ResponseStats {
      *
      * @return {string}
      */
-    statusCounterKey() {
+    statusCounterKey(): string {
         return `${this.vHost}:${this.status}`;
     }
 
@@ -86,8 +100,8 @@ class ResponseStats {
      *
      * @return {string}
      */
-    latencyKey() {
-        return `${this.vHost}:latency`;
+    latencyKey(): string {
+        return `${this.vHost}:${KeysSuffix.Latency}`;
     }
 
     /**
@@ -95,8 +109,8 @@ class ResponseStats {
      *
      * @return {string}
      */
-    totalNumberOfRequestKey() {
-        return `${this.vHost}:req`;
+    totalNumberOfRequestKey(): string {
+        return `${this.vHost}:${KeysSuffix.RequestCounter}`;
     }
 
     /**
@@ -104,21 +118,28 @@ class ResponseStats {
      *
      * @return {string}
      */
-    lastRequestDateKey() {
-        return `${this.vHost}:last`;
+    lastRequestDateKey(): string {
+        return `${this.vHost}:${KeysSuffix.LastRequestDate}`;
     }
 
     /**
      * To JSON object
      * @return {string}
      */
-    toJSON() {
+    toJSON(): string {
         return JSON.stringify({
             status: this.status,
             timing: this.timing,
             vHost: this.vHost,
             date: this._date.getTime()
         });
+    }
+
+    /**
+     * Status‘
+     */
+    toString(): string {
+        return util.format("status:%d, timing:%s, virtual host:%s at %s", this.status, this.timing, this.vHost, this.date)
     }
 }
 
