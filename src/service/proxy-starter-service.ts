@@ -117,7 +117,7 @@ export class ProxyStarterService {
                 });
         } else {
             //@ts-ignore
-            WORKER_LOGGER.addContext('worker', cluster.worker.id);
+            WORKER_LOGGER.addContext('workerId', cluster.worker.id);
             //@ts-ignore
             WORKER_LOGGER.info(`Worker ${cluster.worker.id} started`);
 
