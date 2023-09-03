@@ -11,10 +11,13 @@ import {Config} from "../app/config";
 export class ForwardedHeaderMiddleware implements Middleware {
 
     onProxyRequest(proxyRequest: ServerRequest, proxyResponse: ServerResponse, next: () => void): void {
-        next()
+        next();
     }
 
     preUpstreamRequest(upstream: UpstreamHost, options: ProxyRequestOptions, proxyResponse: ServerResponse, next: () => void): void {
+        //@ts-ignore
+        options.headers['forwarded'] = util.format('proto=%s;by=%s', proxyResponse.protocol, Config.appId());
+
         next();
     }
 
@@ -23,15 +26,11 @@ export class ForwardedHeaderMiddleware implements Middleware {
     }
 
     onProxyResponse(proxyResponse: ServerResponse, next: () => void) {
-        proxyResponse.setHeader(
-            'forwarded',
-            util.format('proto=%s;by=%s', proxyResponse.protocol,proxyResponse, Config.appId())
-        )
         next();
     }
 
     serialize(): any {
-        return MiddlewareRegistry.ContentEncoding;
+        return MiddlewareRegistry.ForwardHeaders;
     }
 
 }

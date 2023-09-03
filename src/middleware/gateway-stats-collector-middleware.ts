@@ -4,6 +4,7 @@ import {ClientResponse, ProxyResponse, ServerResponse} from "../model/response";
 import {UpstreamHost} from "../model/upstream-host";
 import {ProxyRequestOptions} from "../model/proxy-request-options";
 import {GatewayHostService} from "../service/gateway-host-service";
+import {MiddlewareRegistry} from "./middleware-registry";
 
 export class GatewayStatsCollectorMiddleware implements Middleware {
 
@@ -36,7 +37,7 @@ export class GatewayStatsCollectorMiddleware implements Middleware {
     }
 
     serialize(): any {
-        return;
+        return MiddlewareRegistry.GatewayStatsCollector;
     }
 
 }

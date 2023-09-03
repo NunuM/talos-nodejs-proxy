@@ -13,14 +13,14 @@ import {Gateway} from "../model/gateway";
  * @class
  * @extends {Repository}
  */
-class RedisRepository implements Repository {
+export class RedisRepository implements Repository {
 
     private _client: RedisClientType;
     private _buffer: any[];
 
     /**
      * @constructor
-     * @param {RedisClient} client
+     * @param {string} connectionString
      */
     constructor(connectionString: string) {
         this._client = redis.createClient({
@@ -77,19 +77,9 @@ class RedisRepository implements Repository {
         return await this._client.hGetAll(RedisKeys.HOSTS)
             .then((hosts) => {
 
-                const promises = [];
-
-                for (const host of Object.values(hosts)) {
-                    promises.push(this._client.hGet(RedisKeys.HOSTS, host));
-                }
-
-                return Promise.all(promises);
-            })
-            .then((hosts) => {
-
                 const result: VirtualHost[] = [];
 
-                for (let host of hosts) {
+                for (let host of Object.values(hosts)) {
                     if (host) {
                         const fromJSONString = VirtualHost.fromJSONString(host);
                         if (fromJSONString) {
@@ -184,19 +174,9 @@ class RedisRepository implements Repository {
         return await this._client.hGetAll(RedisKeys.APIS)
             .then((hosts) => {
 
-                const promises = [];
-
-                for (const host of Object.values(hosts)) {
-                    promises.push(this._client.hGet(RedisKeys.APIS, host));
-                }
-
-                return Promise.all(promises);
-            })
-            .then((hosts) => {
-
                 const result: ApiGateway[] = [];
 
-                for (let host of hosts) {
+                for (let host of Object.values(hosts)) {
                     if (host) {
                         const fromJSONString = ApiGateway.fromJSONString(host);
                         if (fromJSONString) {
@@ -268,6 +248,3 @@ class RedisRepository implements Repository {
         }
     }
 }
-
-
-module.exports = {RedisRepository};

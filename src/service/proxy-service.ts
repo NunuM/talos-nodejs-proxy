@@ -94,12 +94,12 @@ export class ProxyService {
 
             let clientHeader: string | string[] | undefined = proxyRequest.host;
 
-            if (Array.isArray(clientHeader)) {
+            if (!clientHeader) {
                 this.handleInvalidHostHeader(clientHeader, proxyRequest, proxyResponse);
                 return;
             }
 
-            if (!clientHeader) {
+            if (Array.isArray(clientHeader)) {
                 this.handleInvalidHostHeader(clientHeader, proxyRequest, proxyResponse);
                 return;
             }

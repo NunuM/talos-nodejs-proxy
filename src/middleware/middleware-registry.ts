@@ -25,11 +25,11 @@ export const MiddlewareFactory = {
     [MiddlewareRegistry.CorrelationId]: () => new CorrelationIdMiddleware(),
 }
 
-
 export const MiddlewareList = [
     {id: MiddlewareRegistry.AccessLogging, name: 'AccessLoggingMiddleware'},
     {id: MiddlewareRegistry.ContentEncoding, name: 'EncodingMiddleware'},
     {id: MiddlewareRegistry.ForwardHeaders, name: 'ForwardedHeaderMiddleware'},
     {id: MiddlewareRegistry.GatewayInMaintenance, name: 'GatewayInMaintenanceMiddleware'},
-    {id: MiddlewareRegistry.ContentEncoding, name: 'CorrelationIdMiddleware'},
+    {id: MiddlewareRegistry.CorrelationId, name: 'CorrelationIdMiddleware'},
+    {id: MiddlewareRegistry.GatewayStatsCollector, name: 'GatewayStatsCollectorMiddleware'},
 ]
