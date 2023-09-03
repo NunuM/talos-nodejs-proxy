@@ -1,8 +1,9 @@
 import {Proxy} from "./proxy";
 import * as http2 from "http2";
-import {Http2Request, ServerRequest} from "../model/request";
-import {Http2Response, ServerResponse} from "../model/response";
+import {Http2CompatibleModeRequest, Http2Request, ServerRequest} from "../model/request";
+import {Http2CompatibleModeResponse, Http2Response, ServerResponse} from "../model/response";
 import {LOGGER} from "../service/logger-service";
+import {protocolFrom} from "../model/protocol";
 
 
 export class Http2Proxy implements Proxy {
@@ -21,14 +22,24 @@ export class Http2Proxy implements Proxy {
      * @inheritDoc
      */
     start(handler: (request: ServerRequest, response: ServerResponse) => void): void {
-        this._server = http2.createSecureServer(this._options);
 
-        this._server.on('stream', (stream, headers) => {
-            handler(new Http2Request(stream, headers), new Http2Response(stream));
-        });
+        if (this._options.allowHTTP1) {
+            this._server = http2.createSecureServer(this._options, (request, response) => {
+                handler(
+                    new Http2CompatibleModeRequest(request),
+                    new Http2CompatibleModeResponse(response, protocolFrom(request))
+                );
+            });
+        } else {
+            this._server = http2.createSecureServer(this._options);
+
+            this._server.on('stream', (stream, headers) => {
+                handler(new Http2Request(stream, headers), new Http2Response(stream));
+            });
+        }
 
         this._server.on('connection', (connection) => {
-            LOGGER.info(`Receive new connection with remote IP: ${connection.remoteAddress}`);
+            LOGGER.debug(`Receive new connection with remote IP: ${connection.remoteAddress}`);
         });
 
         this._server.on('sessionError', (error) => {
@@ -36,8 +47,8 @@ export class Http2Proxy implements Proxy {
         });
 
         this._server.on('unknownProtocol', (socket) => {
-            LOGGER.error('unknownProtocol');
-        })
+            LOGGER.error('unknownProtocol', socket.alpnProtocol);
+        });
 
         this._server.on('error', (e) => {
             LOGGER.error(`Occurred an error on proxy server: ${e.message}`);

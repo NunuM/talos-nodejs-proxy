@@ -6,6 +6,7 @@ import {ServerRequest} from "../model/request";
 import {ClientResponse, ProxyResponse, ServerResponse} from "../model/response";
 import {ProxyRequestOptions} from "../model/proxy-request-options";
 import {Transform} from "stream";
+import {MiddlewareRegistry} from "./middleware-registry";
 
 export class EncodingMiddleware implements Middleware {
 
@@ -62,4 +63,7 @@ export class EncodingMiddleware implements Middleware {
         next();
     }
 
+    serialize(): any {
+        return MiddlewareRegistry.ContentEncoding;
+    }
 }

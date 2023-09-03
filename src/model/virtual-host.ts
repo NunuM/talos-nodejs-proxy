@@ -1,11 +1,12 @@
 import {UpstreamHost} from "./upstream-host";
 import {LOGGER} from "../service/logger-service";
-import {Gateway} from "./gateway";
+import {Gateway, GatewaysTypes} from "./gateway";
 import {LoadBalancerFactory, LoadBalancerType} from "../load_balancer/load-balancer-type";
-import {LoadBalancer} from "../load_balancer/load-balancer";
 import {Identifiable} from "pluto-http-client/dist/framework/identifiable";
 import {TimeUnit} from "pluto-http-client";
 import {ServerRequest} from "./request";
+import {Middleware} from "../middleware/middleware";
+import {MiddlewareFactory} from "../middleware/middleware-registry";
 
 
 /**
@@ -13,13 +14,9 @@ import {ServerRequest} from "./request";
  */
 export class VirtualHost extends Gateway implements Identifiable {
 
-    private readonly _domain: string;
-    private _name: string;
     private readonly _upstreamHosts: UpstreamHost[];
     private readonly _isRegex: boolean;
     private readonly _regex: RegExp | null;
-    private readonly _loadBalancer: LoadBalancer;
-    private _requestTimeout: number;
 
     /**
      * @constructor
@@ -27,16 +24,17 @@ export class VirtualHost extends Gateway implements Identifiable {
      * @param {string} name
      * @param {number} loadBalancing;
      * @param {Array<UpstreamHost>} upstreamHosts
+     * @param {Array<Middleware>} middlewares
      * @param {number} [requestTimeout=60000]
      */
     constructor(domain: string,
                 name: string,
                 loadBalancing: LoadBalancerType,
                 upstreamHosts: UpstreamHost[] = [],
+                middlewares: Middleware[] = [],
                 requestTimeout: number = 1 * TimeUnit.Minutes) {
-        super();
-        this._domain = domain;
-        this._name = name;
+        super(domain, name, LoadBalancerFactory.getLoadBalancer(loadBalancing), middlewares, requestTimeout);
+
         this._upstreamHosts = upstreamHosts;
         this._isRegex = domain.includes('*');
         if (this._isRegex) {
@@ -45,8 +43,6 @@ export class VirtualHost extends Gateway implements Identifiable {
         } else {
             this._regex = null;
         }
-        this._loadBalancer = LoadBalancerFactory.getLoadBalancer(loadBalancing);
-        this._requestTimeout = requestTimeout;
     }
 
     /**
@@ -55,33 +51,7 @@ export class VirtualHost extends Gateway implements Identifiable {
      * @return {string}
      */
     id(): string {
-        return this._domain;
-    }
-
-    get domain(): string {
-        return this._domain;
-    }
-
-    /**
-     * Label of virtual host
-     *
-     * @return {string}
-     */
-    get name() {
-        return this._name;
-    }
-
-    /**
-     * Define new label for virtual host
-     *
-     * @param {string} value
-     */
-    set name(value) {
-        this._name = value;
-    }
-
-    get lb() {
-        return this._loadBalancer;
+        return this.domain;
     }
 
     /**
@@ -110,12 +80,7 @@ export class VirtualHost extends Gateway implements Identifiable {
      * @return {UpstreamHost}
      */
     nextUpstream() {
-        return this._loadBalancer.nextHost(this.upstreamHosts);
-    }
-
-
-    get requestTimeout(): number {
-        return this._requestTimeout;
+        return this.loadBalancer.nextHost(this.upstreamHosts);
     }
 
     /**
@@ -139,12 +104,57 @@ export class VirtualHost extends Gateway implements Identifiable {
      */
     toJSON() {
         return {
+            type: GatewaysTypes.VirtualHost,
             domain: this.domain,
             name: this.name,
-            lb: this.lb.type,
+            loadBalancer: this.loadBalancer.type,
+            requestTimeout: this.requestTimeout,
             upstreamHosts: this.upstreamHosts,
-            requestTimeout: this.requestTimeout
+            middlewares: this.middlewares.map((m) => m.serialize()),
         };
+    }
+
+    /**
+     * Create instance from object
+     * @param obj
+     */
+    static fromJSONObject(obj: VirtualHostObjectDefinition): VirtualHost | undefined {
+
+        try {
+            // @ts-ignore
+            const domain: string = obj.domain || obj.host;
+
+            //@ts-ignore
+            obj.upstreamHosts = (obj.upstreamHosts || []).map((proxy) => {
+                return new UpstreamHost(
+                    proxy.host,
+                    proxy.port,
+                    proxy.isAlive,
+                    proxy.isHTTPS,
+                    proxy.isHTTP2,
+                    proxy.isHTTP
+                );
+            });
+
+            // @ts-ignore
+            const middlewares = (obj.middlewares || []).map((m) => MiddlewareFactory[m](domain));
+
+            // @ts-ignore
+            return new VirtualHost(
+                domain,
+                obj.name,
+                obj.lb || obj.loadBalancer,
+                // @ts-ignore
+                obj.upstreamHosts,
+                middlewares,
+                obj.requestTimeout);
+
+        } catch (e) {
+            LOGGER.error("Error creating virtual host instance", obj, e);
+        }
+
+        return undefined;
+
     }
 
     /**
@@ -153,31 +163,12 @@ export class VirtualHost extends Gateway implements Identifiable {
      * @param {string} data
      */
     static fromJSONString(data: string): VirtualHost | undefined {
-
         if (typeof data === 'string') {
             try {
                 const obj = JSON.parse(data);
-
-                //@ts-ignore
-                obj.upstreamHosts = (obj.upstreamHosts || []).map((proxy) => {
-                    return new UpstreamHost(
-                        proxy.host,
-                        proxy.port,
-                        proxy.isAlive,
-                        proxy.isHTTPS,
-                        proxy.isHTTP2,
-                        proxy.isHTTP
-                    );
-                });
-
-                return new VirtualHost(obj.domain || obj.host,
-                    obj.name,
-                    obj.lb,
-                    obj.upstreamHosts,
-                    obj.requestTimeout);
-
+                return VirtualHost.fromJSONObject(obj);
             } catch (e) {
-                LOGGER.error("Error parsing data from redis", e);
+                LOGGER.error("Error deserializing virtual host from raw string", data, e);
             }
         }
         return undefined;
@@ -188,7 +179,7 @@ export class VirtualHost extends Gateway implements Identifiable {
     }
 
     clone(domain: string): Gateway {
-        return new VirtualHost(domain, this.name, this.lb.type, this.upstreamHosts);
+        return new VirtualHost(domain, this.name, this.loadBalancer.type, this.upstreamHosts, this.middlewares, this.requestTimeout);
     }
 
     async clean(): Promise<boolean> {
@@ -201,6 +192,16 @@ export class VirtualHost extends Gateway implements Identifiable {
 
         return result;
     }
+}
 
-
+export interface VirtualHostObjectDefinition {
+    type: string;
+    domain: string;
+    host?: string; // old support
+    lb?: number; // old support
+    name: string;
+    loadBalancer: number,
+    upstreamHosts: Array<{ host: string; port: number, isAlive: boolean, isHTTPS: boolean, isHTTP2: boolean, isHTTP: boolean }>,
+    middlewares: number[];
+    requestTimeout: number;
 }

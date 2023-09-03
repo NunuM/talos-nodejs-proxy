@@ -7,37 +7,58 @@ import log4js from 'log4js';
 
 /** project imports */
 import {Config} from '../app/config';
-import http from "http";
 
+let emailLogConfig = {
+    type: 'console'
+};
+const alarmistic = Config.alarmistic();
+const logging = Config.logging();
 
-log4js.addLayout('email', function (config) {
-    return function (logEvent) {
-        let emailTemplate;
+if (alarmistic) {
 
-        if ((emailTemplate = Config.emailHtmlTemplate())) {
+    log4js.addLayout('email', function (config) {
+        return function (logEvent) {
+            let emailTemplate;
 
-            const date = logEvent.startTime.toISOString().match(/([^T]+)T([^\.]+)/);
+            if ((emailTemplate = alarmistic.errorEmailTemplateFile)) {
 
-            if (!date) {
-                return;
+                const date = logEvent.startTime.toISOString().match(/([^T]+)T([^\.]+)/);
+
+                if (!date) {
+                    return;
+                }
+
+                const context = Object.entries(logEvent.context).reduce(function (acc, [k, v]) {
+                    acc += `<tr><td>${k}</td><td>${v}</td></tr>`;
+                    return acc;
+                }, "");
+
+                const data = util.format(...logEvent.data)
+                    .replace("\n", "<br/>");
+
+                return emailTemplate.replace(":date", `${date[1]} ${date[2]}`)
+                    .replace(":vars", `${context}`)
+                    .replace(":data", `${data}`);
             }
 
-            const context = Object.entries(logEvent.context).reduce(function (acc, [k, v]) {
-                acc += `<tr><td>${k}</td><td>${v}</td></tr>`;
-                return acc;
-            }, "");
-
-            const data = util.format(...logEvent.data)
-                .replace("\n", "<br/>");
-
-            return emailTemplate.replace(":date", `${date[1]} ${date[2]}`)
-                .replace(":vars", `${context}`)
-                .replace(":data", `${data}`);
+            return JSON.stringify(logEvent) + config.separator;
         }
+    });
 
-        return JSON.stringify(logEvent) + config.separator;
-    }
-});
+    emailLogConfig = {
+        type: '@log4js-node/smtp',
+        //@ts-ignore
+        SMTP: {
+            host: alarmistic.smtpServer,
+            port: alarmistic.smtpPort
+        },
+        recipients: alarmistic.recipients.join(','),
+        subject: alarmistic.subject,
+        sender: alarmistic.smtpServer,
+        layout: {type: 'email'},
+        html: true
+    };
+}
 
 log4js.configure({
     appenders: {
@@ -45,34 +66,33 @@ log4js.configure({
             type: 'console',
             layout: {
                 type: 'pattern',
-                pattern: Config.loggingFormat(),
+                pattern: '%[[%d]%] %[[%p]%] %[[%c]%] - %m'
+            }
+        },
+        worker: {
+            type: 'console',
+            layout: {
+                type: 'pattern',
+                pattern: '%[[%d]%] %[[%p]%] %[[%c]%] [worker:%X{workerId}] - %m'
             }
         },
         file: {
             type: 'file',
-            filename: path.join(Config.accessLogLoggerDirectory(), 'access.log'),
+            filename: path.join(logging.accessLog.logDirectory, 'access.log'),
             layout: {
                 type: 'pattern',
                 pattern: '%m'
             }
         },
-        email: {
-            type: '@log4js-node/smtp',
-            SMTP: {
-                "host": Config.email().smtp,
-                "port": 25
-            },
-            recipients: Config.email().recipients,
-            subject: Config.email().subject,
-            sender: 'proxy@talos.sh',
-            layout: {type: 'email'},
-            html: true
-        },
+        email: emailLogConfig,
         'just-errors': {type: 'logLevelFilter', appender: 'email', level: 'error'}
     },
     categories: {
-        proxy: {appenders: ['file'], level: Config.loggingLevel()},
-        default: {appenders: ['console', 'just-errors'], level: Config.loggingLevel()}
+        proxy: {appenders: ['console'], level: logging.proxy.level},
+        accessLog: {appenders: ['file'], level: logging.accessLog.level},
+        admin: {appenders: ['console'], level: logging.admin.level},
+        worker: {appenders: ['worker'], level: logging.worker.level},
+        default: {appenders: ['console', 'just-errors'], level: logging.proxy.level}
     }
 });
 
@@ -80,15 +100,27 @@ log4js.configure({
  * @readonly
  * @type {Logger}
  */
-export const LOGGER = log4js.getLogger();
+export const LOGGER = log4js.getLogger('proxy');
 
 /**
  * @readonly
  * @type {Logger}
  */
-export const ACCESS_LOG = log4js.getLogger('proxy');
+export const ADMIN_LOGGER = log4js.getLogger('admin');
+
+/**
+ * @readonly
+ * @type {Logger}
+ */
+export const WORKER_LOGGER = log4js.getLogger('worker');
+
+/**
+ * @readonly
+ * @type {Logger}
+ */
+export const ACCESS_LOG = log4js.getLogger('accessLog');
 
 export const handler = log4js.connectLogger(ACCESS_LOG, {
     level: 'auto',
-    format: (req, res, format) => format(Config.logAccessFormat())
+    format: (req, res, format) => format(logging.accessLog.format)
 });

@@ -4,7 +4,7 @@ import http from "http";
 import {UpstreamHost} from "./upstream-host";
 import {Http1ProxyRequestOptions, Http2ProxyRequestOptions, ProxyRequestOptions} from "./proxy-request-options";
 import {Writable} from "stream";
-import {HeadersConverter, HttpVersion} from "./protocol";
+import {HeadersConverter} from "./protocol";
 import {Gateway} from "./gateway";
 
 
@@ -17,6 +17,10 @@ export interface ServerRequest {
     get acceptEncoding(): string;
 
     get contentEncoding(): string | undefined;
+
+    get correlationId(): string | undefined;
+
+    set correlationId(value: string | undefined);
 
     pipe(writable: Writable): Writable;
 
@@ -53,7 +57,22 @@ export class Http1Request implements ServerRequest {
         return this._request.headers["content-encoding"];
     }
 
+    get correlationId(): string | undefined {
+        //@ts-ignore
+        return this._request.headers["x-correlation-id"];
+    }
+
+    set correlationId(value: string | undefined) {
+        this._request.headers['x-correlation-id'] = value;
+    }
+
     proxyOptionsFor(gateway: Gateway, upstream: UpstreamHost): ProxyRequestOptions {
+
+        const abortController = new AbortController();
+
+        this._request.setTimeout(gateway.requestTimeout, () => {
+            abortController.abort("Socket timeout");
+        });
 
         const copy = JSON.parse(JSON.stringify(this._request.headers));
 
@@ -61,18 +80,17 @@ export class Http1Request implements ServerRequest {
 
         if (upstream.isHTTP2) {
 
-            delete copy['connection'];
-
             return {
                 headers: {
                     [http2.constants.HTTP2_HEADER_METHOD]: this._request.method,
                     [http2.constants.HTTP2_HEADER_PATH]: this.path,
-                    ...copy
+                    ...HeadersConverter.convertHttpToHttp2(copy)
                 },
                 client: {
                     rejectUnauthorized: false,
                     timeout: gateway.requestTimeout
-                }
+                },
+                signal: abortController.signal
             } as Http2ProxyRequestOptions;
         }
 
@@ -84,6 +102,7 @@ export class Http1Request implements ServerRequest {
             headers: copy,
             timeout: gateway.requestTimeout,
             rejectUnauthorized: false,
+            signal: abortController.signal
         } as Http1ProxyRequestOptions;
     }
 
@@ -100,6 +119,123 @@ export class Http1Request implements ServerRequest {
 
         return this;
     }
+}
+
+export class Http2CompatibleModeRequest implements ServerRequest {
+
+    private readonly _request: http2.Http2ServerRequest;
+
+    constructor(request: http2.Http2ServerRequest) {
+        this._request = request;
+
+        if (!this._request.headers.host) {
+            this._request.headers.host = this._request.authority;
+        }
+    }
+
+    get acceptEncoding(): string {
+        //@ts-ignore
+        return this._request['accept-encoding'] || '';
+    }
+
+    get contentEncoding(): string | undefined {
+        return this._request.headers["content-encoding"];
+    }
+
+    get correlationId(): string | undefined {
+        //@ts-ignore
+        return this._request.headers["x-correlation-id"];
+    }
+
+    set correlationId(value: string | undefined) {
+        this._request.headers['x-correlation-id'] = value;
+    }
+
+    getTransport(): any {
+        return this._request;
+    }
+
+    get host(): string | string[] | undefined {
+        return this._request.authority || this._request.headers.host;
+    }
+
+    once(eventName: string | symbol, listener: (...args: any[]) => void): this {
+        this._request.once(eventName, listener);
+        return this;
+    }
+
+    get path(): string {
+        return this._request.url;
+    }
+
+    pipe(writable: Writable): Writable {
+        return this._request.pipe(writable);
+    }
+
+    proxyOptionsFor(gateway: Gateway, upstream: UpstreamHost): ProxyRequestOptions {
+
+        const abortController = new AbortController();
+
+        this._request.setTimeout(gateway.requestTimeout, () => {
+            abortController.abort("Socket timeout");
+        });
+
+        const copy = JSON.parse(JSON.stringify(this._request.headers));
+
+        copy.host = upstream.host;
+
+        if (upstream.isHTTP2) {
+            if (this._request.httpVersion == '2.0') {
+                return {
+                    headers: copy,
+                    client: {
+                        rejectUnauthorized: false,
+                        timeout: gateway.requestTimeout
+                    },
+                    signal: abortController.signal
+                } as Http2ProxyRequestOptions;
+            } else {
+                return {
+                    headers: {
+                        [http2.constants.HTTP2_HEADER_METHOD]: this._request.method,
+                        [http2.constants.HTTP2_HEADER_PATH]: this.path,
+                        ...HeadersConverter.convertHttpToHttp2(copy)
+                    },
+                    client: {
+                        rejectUnauthorized: false,
+                        timeout: gateway.requestTimeout
+                    },
+                    signal: abortController.signal
+                } as Http2ProxyRequestOptions;
+            }
+        }
+
+        if (this._request.httpVersion == '2.0') {
+            return {
+                hostname: upstream.host,
+                port: upstream.port,
+                path: this.path,
+                method: this._request.method,
+                headers: HeadersConverter.convertHttp2ToHttp(copy),
+                timeout: gateway.requestTimeout,
+                rejectUnauthorized: false,
+                signal: abortController.signal
+            } as Http1ProxyRequestOptions;
+        } else {
+            return {
+                hostname: upstream.host,
+                port: upstream.port,
+                path: this.path,
+                method: this._request.method,
+                headers: copy,
+                timeout: gateway.requestTimeout,
+                rejectUnauthorized: false,
+                signal: abortController.signal
+            } as Http1ProxyRequestOptions;
+        }
+    }
+
+
 }
 
 export class Http2Request implements ServerRequest {
@@ -140,7 +276,22 @@ export class Http2Request implements ServerRequest {
         return this._headers2["content-encoding"];
     }
 
+    get correlationId(): string | undefined {
+        //@ts-ignore
+        return this._headers2["x-correlation-id"];
+    }
+
+    set correlationId(value: string | undefined) {
+        this._headers2['x-correlation-id'] = value;
+    }
+
     proxyOptionsFor(gateway: Gateway, upstream: UpstreamHost): ProxyRequestOptions {
+
+        const abortController = new AbortController();
+
+        this._stream.setTimeout(gateway.requestTimeout,() => {
+            abortController.abort("Socket timeout");
+        });
 
         if (upstream.isHTTP2) {
             return {
@@ -148,11 +299,12 @@ export class Http2Request implements ServerRequest {
                 client: {
                     rejectUnauthorized: false,
                     timeout: gateway.requestTimeout
-                }
+                },
+                signal: abortController.signal
             } as Http2ProxyRequestOptions;
         }
 
-        const http1Headers = HeadersConverter.convert(HttpVersion.H2, HttpVersion.H1, this._headers2);
+        const http1Headers = HeadersConverter.convertHttp2ToHttp(this._headers2);
 
         http1Headers.host = upstream.host;
 
@@ -162,15 +314,31 @@ export class Http2Request implements ServerRequest {
             path: this.path,
             method: this._headers2[http2.constants.HTTP2_HEADER_METHOD],
             headers: http1Headers,
-            rejectUnauthorized: false
+            rejectUnauthorized: false,
+            signal: abortController.signal
         } as Http1ProxyRequestOptions;
-
     }
 
     getTransport(): any {
-        return this._stream;
+        return {
+            headers: {host: this.host, ...this._headers2},
+            httpVersion: '2.0',
+            httpVersionMinor: 0,
+            httpVersionMajor: 2,
+            socket: this._stream.session?.socket,
+            url: this.path,
+            method: this._headers2[http2.constants.HTTP2_HEADER_METHOD],
+            on: (eventName: string | symbol, listener: (...args: any[]) => void) => {
+                this._stream.on(eventName, listener);
+            },
+            once: (eventName: string | symbol, listener: (...args: any[]) => void) => {
+                this._stream.once(eventName, listener);
+            },
+            getHeader: (header: string) => {
+                return this._headers2[header];
+            }
+        };
     }
-
 }
 
 export interface ClientRequest {

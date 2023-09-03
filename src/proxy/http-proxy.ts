@@ -37,7 +37,7 @@ export class HttpProxy implements Proxy {
                 socket.end('HTTP/1.1 588 Bad request\r\n\r\n');
             })
             .on('connection', (connection) => {
-                LOGGER.info(`Receive new connection with remote IP: ${connection.remoteAddress}`);
+                LOGGER.debug(`Receive new connection with remote IP: ${connection.remoteAddress}`);
             })
             .on('error', (e) => {
                 LOGGER.error(`Occurred an error on proxy server: ${e.message}`);

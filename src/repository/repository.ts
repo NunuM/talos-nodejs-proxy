@@ -7,6 +7,24 @@ import {Gateway} from "../model/gateway";
 export interface Repository {
 
     /**
+     *
+     */
+    connect(): Promise<void>;
+
+    /**
+     *
+     * @param domain
+     */
+    getGatewayById(domain: string): Promise<Gateway | undefined>;
+
+    /**
+     * @abstract
+     * @param {string} domain
+     * @return boolean
+     */
+    existsGateway(domain: string): Promise<boolean>;
+
+    /**
      * @abstract
      * @param {Gateway} gateway
      * @return boolean

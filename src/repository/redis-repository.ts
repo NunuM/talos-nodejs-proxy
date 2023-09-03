@@ -3,11 +3,11 @@ import {Repository} from "./repository";
 import {VirtualHost} from "../model/virtual-host";
 import {RedisKeys} from "../model/redis-keys";
 import {ResponseStats} from "../model/response-stats";
+import * as redis from "redis";
 import {RedisClientType} from "redis";
 import {LOGGER} from "../service/logger-service";
 import {ApiGateway} from "../model/api-gateway";
 import {Gateway} from "../model/gateway";
-
 
 /**
  * @class
@@ -22,12 +22,51 @@ class RedisRepository implements Repository {
      * @constructor
      * @param {RedisClient} client
      */
-    constructor(client: RedisClientType) {
-        this._client = client;
+    constructor(connectionString: string) {
+        this._client = redis.createClient({
+            url: connectionString,
+        });
         this._buffer = [];
 
         this._client.on('ready', () => {
             this.flushBuffer().finally();
+        });
+    }
+
+    /**
+     * @inheritDoc
+     */
+    connect(): Promise<void> {
+        return this._client.connect();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    getGatewayById(domain: string): Promise<Gateway | undefined> {
+        return Promise.all([
+            this._client.hGet(RedisKeys.APIS, domain),
+            this._client.hGet(RedisKeys.HOSTS, domain)
+        ]).then((results) => {
+            if (results[0]) {
+                return ApiGateway.fromJSONString(results[0]);
+            } else if (results[1]) {
+                return VirtualHost.fromJSONString(results[1]);
+            } else {
+                return undefined;
+            }
+        });
+    }
+
+    /**
+     * @inheritDoc
+     */
+    existsGateway(domain: string): Promise<boolean> {
+        return Promise.all([
+            this._client.hExists(RedisKeys.APIS, domain),
+            this._client.hExists(RedisKeys.HOSTS, domain)
+        ]).then((results) => {
+            return results[0] || results[1];
         });
     }
 

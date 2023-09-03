@@ -19,11 +19,8 @@ describe('Test gateways types', () => {
         expect(virtualHost.domain).toBe('test.com');
         expect(virtualHost.id()).toBe('test.com');
         expect(virtualHost.isRegexBased).toBe(false);
-        expect(virtualHost.lb.type).toBe(LoadBalancerType.RoundRobin);
+        expect(virtualHost.loadBalancer.type).toBe(LoadBalancerType.RoundRobin);
 
-        virtualHost.name = 'TheTest';
-
-        expect(virtualHost.name).toBe('TheTest');
 
         expect(virtualHost.upstreamHosts.length).toBe(2);
 
@@ -43,7 +40,7 @@ describe('Test gateways types', () => {
         expect(regexVirtualHost.domain).toBe('*.test.com');
         expect(regexVirtualHost.id()).toBe('*.test.com');
         expect(regexVirtualHost.isRegexBased).toBe(true);
-        expect(regexVirtualHost.lb.type).toBe(LoadBalancerType.FirstFree);
+        expect(regexVirtualHost.loadBalancer.type).toBe(LoadBalancerType.FirstFree);
 
         expect(regexVirtualHost.match('proxy.test.com')).toBe(true);
         expect(regexVirtualHost.match('proxy.proxy.com')).toBe(false);
@@ -61,7 +58,7 @@ describe('Test gateways types', () => {
             expect(clonedVirtualHost.domain).toBe('proxy.test.com');
             expect(clonedVirtualHost.id()).toBe('proxy.test.com');
             expect(clonedVirtualHost.isRegexBased).toBe(false);
-            expect(clonedVirtualHost.lb.type).toBe(LoadBalancerType.FirstFree);
+            expect(clonedVirtualHost.loadBalancer.type).toBe(LoadBalancerType.FirstFree);
 
 
             upstreamHost1.isOnline = false;
@@ -203,7 +200,7 @@ describe('Test gateways types', () => {
         expect(virtualHost.domain).toBe('test.pt');
         expect(virtualHost.id()).toBe('test.pt');
         expect(virtualHost.isRegexBased).toBe(false);
-        expect(virtualHost.lb.type).toBe(LoadBalancerType.RoundRobin);
+        expect(virtualHost.loadBalancer.type).toBe(LoadBalancerType.RoundRobin);
 
         expect(virtualHost.upstreamHosts.length).toBe(2);
 
@@ -221,7 +218,7 @@ describe('Test gateways types', () => {
             expect(virtualHost1.domain).toBe('test.pt');
             expect(virtualHost1.id()).toBe('test.pt');
             expect(virtualHost1.isRegexBased).toBe(false);
-            expect(virtualHost1.lb.type).toBe(LoadBalancerType.RoundRobin);
+            expect(virtualHost1.loadBalancer.type).toBe(LoadBalancerType.RoundRobin);
 
             expect(virtualHost1.upstreamHosts.length).toBe(2);
 

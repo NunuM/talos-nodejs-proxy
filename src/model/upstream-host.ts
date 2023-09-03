@@ -34,7 +34,7 @@ export class UpstreamHost {
                 isAlive: boolean = true,
                 isHTTPS: boolean = false,
                 isHTTP2: boolean = false,
-                isHTTP: boolean = true) {
+                isHTTP: boolean = false) {
         this._host = host;
         this._port = port;
         this._isOnline = isAlive;

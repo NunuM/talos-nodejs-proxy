@@ -1,8 +1,8 @@
 import http from "http";
-import * as http2 from "http2";
+import http2 from "http2";
 import {pipeline, Readable, Transform} from "stream";
 import {LOGGER} from "../service/logger-service";
-import {HeadersConverter, HttpVersion, Protocol} from "./protocol";
+import {HeadersConverter, Protocol} from "./protocol";
 
 export interface ServerResponse {
 
@@ -20,6 +20,8 @@ export interface ServerResponse {
 }
 
 export interface ProxyResponse extends ServerResponse {
+
+    get status(): number;
 
     deleteHeader(headerName: string): void;
 
@@ -62,6 +64,10 @@ class ProxyResponseImpl implements ServerResponse, ProxyResponse {
 
     deleteHeader(headerName: string): void {
         delete this._source.headers[headerName];
+    }
+
+    get status(): number {
+        return this._source.status;
     }
 
     send(): void {
@@ -115,12 +121,58 @@ export class Http1Response implements ServerResponse {
     }
 }
 
+export class Http2CompatibleModeResponse implements ServerResponse {
+
+    private readonly _protocol: Protocol;
+    private readonly _transform: Transform[] = [];
+    private readonly _headers: { [key: string]: string | string[] } = {};
+    private readonly _response: http2.Http2ServerResponse;
+
+    constructor(response: http2.Http2ServerResponse, protocol: Protocol) {
+        this._response = response;
+        this._protocol = protocol;
+    }
+
+    endWithStatus(status: number, onEnd?: () => void): void {
+        this._response.writeHead(status, this._headers);
+        this._response.end(onEnd);
+    }
+
+    finally(status: number, headers: any, stream: Readable): void {
+        this._response.writeHead(status, Object.assign(headers, this._headers));
+
+        //@ts-ignore
+        pipeline(stream, ...this._transform, this._response, (error) => {
+            if (error) {
+                LOGGER.error("Pipeline failed", error);
+            }
+        });
+    }
+
+    getTransport(): any {
+        return this._response;
+    }
+
+    get protocol(): Protocol {
+        return this._protocol;
+    }
+
+    setHeader(headerName: string, headerValue: string | string[]): void {
+        this._headers[headerName] = headerValue;
+    }
+
+    transform(transformer: Transform): void {
+        this._transform.push(transformer);
+    }
+}
 
 export class Http2Response implements ServerResponse {
 
     private readonly _headers: { [key: string]: string | string[] } = {};
     private readonly _transform: Transform[] = [];
     private readonly _serverResponse: http2.ServerHttp2Stream;
+
+    private _transport?: any;
 
     constructor(serverResponse: http2.ServerHttp2Stream) {
         this._serverResponse = serverResponse;
@@ -135,10 +187,33 @@ export class Http2Response implements ServerResponse {
     }
 
     getTransport(): any {
-        return this._serverResponse;
+        return this._transport = {
+            statusCode: undefined,
+            headers: this._headers,
+            writeHead: () => {
+            },
+            getHeader: (header: string) => {
+                return this._headers[header];
+            },
+            on: (eventName: string | symbol, listener: (...args: any[]) => void) => {
+                if (eventName !== 'end')
+                    this._serverResponse.on(eventName, listener);
+            },
+            once: (eventName: string | symbol, listener: (...args: any[]) => void) => {
+                this._serverResponse.once(eventName, listener);
+            }
+        };
+    }
+
+    private emitToTransportStatus(status: number, headers: any) {
+        // @ts-ignore
+        this._transport?.statusCode = status;
+        this._transport?.writeHead(status, headers);
     }
 
     finally(status: number, headers: any, stream: Readable) {
+
+        this.emitToTransportStatus(status, headers);
 
         this._serverResponse.respond({
             [http2.constants.HTTP2_HEADER_STATUS]: status,
@@ -154,8 +229,11 @@ export class Http2Response implements ServerResponse {
     }
 
     endWithStatus(status: number, onEnd?: () => void): void {
+
+        this.emitToTransportStatus(status, this._headers);
+
         this._serverResponse.respond({
-            [http2.constants.HTTP2_HEADER_STATUS]: 200,
+            [http2.constants.HTTP2_HEADER_STATUS]: status,
         });
         this._serverResponse.end(onEnd);
     }
@@ -253,11 +331,18 @@ export class Http2ClientResponse implements ClientResponse {
 
     toResponse(serverResponse: ServerResponse): ProxyResponse {
         if (serverResponse.protocol == Protocol.Http) {
-
-            return new ProxyResponseImpl(new NormalizedResponse(this.status, HeadersConverter.convert(HttpVersion.H2, HttpVersion.H1, this._headers), this._response), serverResponse);
+            return new ProxyResponseImpl(
+                new NormalizedResponse(
+                    this.status,
+                    HeadersConverter.convertHttp2ToHttp(this._headers), this._response),
+                serverResponse
+            );
 
         } else {
-            return new ProxyResponseImpl(new NormalizedResponse(this.status, this.headers, this._response), serverResponse);
+            return new ProxyResponseImpl(
+                new NormalizedResponse(this.status, this.headers, this._response),
+                serverResponse
+            );
         }
     }
 }
@@ -295,9 +380,18 @@ export class Http1ClientResponse implements ClientResponse {
     toResponse(serverResponse: ServerResponse): ProxyResponse {
 
         if (serverResponse.protocol == Protocol.Http2) {
-            return new ProxyResponseImpl(new NormalizedResponse(this.status, HeadersConverter.convert(HttpVersion.H1, HttpVersion.H2, this.headers), this._response), serverResponse);
+            return new ProxyResponseImpl(
+                new NormalizedResponse(
+                    this.status,
+                    HeadersConverter.convertHttpToHttp2(this.headers),
+                    this._response),
+                serverResponse
+            );
         }
 
-        return new ProxyResponseImpl(new NormalizedResponse(this.status, this.headers, this._response), serverResponse);
+        return new ProxyResponseImpl(
+            new NormalizedResponse(this.status, this.headers, this._response),
+            serverResponse
+        );
     }
 }

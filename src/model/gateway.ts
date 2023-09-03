@@ -7,21 +7,53 @@ import {ServerRequest} from "./request";
 import {ServerResponse} from "./response";
 import {UpstreamRequestTimeoutException} from "../exceptions/upstream-request-timeout-exception";
 import {ProxyError} from "../exceptions/proxy-error";
+import {LoadBalancer} from "../load_balancer/load-balancer";
+import {ProxyRequestOptions} from "./proxy-request-options";
 
 
 export abstract class Gateway {
 
-    private readonly _middlewares: Middleware[] = [];
+    private readonly _domain: string;
+    private readonly _name: string;
+    private readonly _loadBalancer: LoadBalancer;
+    private readonly _middlewares: Middleware[];
+    private readonly _requestTimeout: number;
 
-    abstract get domain(): string;
+    protected constructor(domain: string, name: string, loadBalancer: LoadBalancer, middlewares: Middleware[], requestTimeout: number) {
 
-    abstract get requestTimeout(): number;
+        if (!domain) {
+            throw new TypeError("Domain cannot be null or empty");
+        }
+
+        this._domain = domain;
+        this._name = name;
+        this._loadBalancer = loadBalancer;
+        this._middlewares = middlewares;
+        this._requestTimeout = requestTimeout;
+    }
+
+    get domain(): string {
+        return this._domain;
+    }
+
+    get name(): string {
+        return this._name;
+    }
+
+    get loadBalancer(): LoadBalancer {
+        return this._loadBalancer;
+    }
+
+    get requestTimeout() {
+        return this._requestTimeout;
+    }
+
+    abstract get isRegexBased(): boolean;
+
 
     abstract resolveUpstream(request: ServerRequest): UpstreamHost | undefined;
 
     abstract match(domain: string): boolean;
-
-    abstract get isRegexBased(): boolean;
 
     abstract clone(domain: string): Gateway;
 
@@ -35,6 +67,8 @@ export abstract class Gateway {
         this._middlewares.push(middleware);
     }
 
+    abstract toJSON(): any;
+
     request(processor: MiddlewareProcessor, request: ServerRequest, response: ServerResponse) {
 
         const from = processor.size;
@@ -47,11 +81,7 @@ export abstract class Gateway {
 
             if (upstream) {
 
-                const proxyRequestOptions = request.proxyOptionsFor(this, upstream);
-
-                const abortController = new AbortController();
-
-                proxyRequestOptions.signal = abortController.signal;
+                const proxyRequestOptions: ProxyRequestOptions = request.proxyOptionsFor(this, upstream);
 
                 processor.preProxy(upstream, proxyRequestOptions, response, () => {
 
@@ -71,7 +101,7 @@ export abstract class Gateway {
                         });
 
                         upstreamRequest.once('error', (error) => {
-                            LOGGER.error("upstreamRequest:evt:error:", error);
+                            LOGGER.error("UpstreamRequest error event:", error);
 
                             if (error instanceof ProxyError) {
                                 response.endWithStatus(error.toResponse().status);
@@ -103,4 +133,10 @@ export abstract class Gateway {
 
         }, from);
     }
+}
+
+
+export enum GatewaysTypes {
+    VirtualHost = 'virtualHost',
+    ApiGateway = 'apiGateway'
 }

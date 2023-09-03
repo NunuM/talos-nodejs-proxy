@@ -4,10 +4,11 @@ import {ClientResponse, ServerResponse} from "../model/response";
 import {UpstreamHost} from "../model/upstream-host";
 import {ProxyRequestOptions} from "../model/proxy-request-options";
 import util from "util";
+import {MiddlewareRegistry} from "./middleware-registry";
+import {Config} from "../app/config";
 
 
-class ForwardedHeaderMiddleware implements Middleware {
-
+export class ForwardedHeaderMiddleware implements Middleware {
 
     onProxyRequest(proxyRequest: ServerRequest, proxyResponse: ServerResponse, next: () => void): void {
         next()
@@ -18,12 +19,19 @@ class ForwardedHeaderMiddleware implements Middleware {
     }
 
     postUpstreamResponse(upstreamRequest: ClientResponse, proxyResponse: ServerResponse, next: () => void): void {
-        proxyResponse.setHeader('forwarded', util.format('for=%s;host=%s;proto=%s'));
         next();
     }
 
     onProxyResponse(proxyResponse: ServerResponse, next: () => void) {
+        proxyResponse.setHeader(
+            'forwarded',
+            util.format('proto=%s;by=%s', proxyResponse.protocol,proxyResponse, Config.appId())
+        )
         next();
+    }
+
+    serialize(): any {
+        return MiddlewareRegistry.ContentEncoding;
     }
 
 }

@@ -1,10 +1,10 @@
 {
-  "name": "talos-node-proxy",
-  "version": "0.0.7",
+  "name": "echo-gate",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "node --require ts-node/register main.js",
-    "generate-docs": "jsdoc -c jsdoc.json"
+    "start": "node --require ts-node/register bin/echo-gate.ts",
+    "test": "npx jest --detectOpenHandles"
   },
   "engines": {
     "node": ">=10.0.0"
@@ -16,7 +16,8 @@
     "http",
     "upstreams",
     "reverse-proxy",
-    "load-balancing"
+    "load-balancing",
+    "api-gateway"
   ],
   "repository": {
     "url": "https://github.com/NunuM/talos-nodejs-proxy",
@@ -26,17 +27,23 @@
     "@log4js-node/smtp": "^2.0.8",
     "log4js": "^6.9.1",
     "redis": "^4.6.7",
-    "pluto-http-client": "^1.0.8"
+    "pluto-http-client": "^1.0.8",
+    "jsonschema": "^1.4.1",
+    "uuid": "^8.3.2",
+    "command-line-args": "^5.2.1",
+    "command-line-usage": "^7.0.1"
   },
   "devDependencies": {
     "docdash": "^1.2.0",
-    "jsdoc": "^3.6.10",
     "jest": "^28.1.2",
     "ts-jest": "^28.0.5",
     "ts-node": "^10.8.2",
     "typescript": "^4.7.4",
     "@types/node": "18.17.0",
     "@types/redis": "^4.0.11",
-    "@types/jest": "^28.1.4"
+    "@types/jest": "^28.1.4",
+    "@types/uuid": "^8.3.4",
+    "@types/command-line-args": "^5.2.0",
+    "@types/command-line-usage": "^5.0.2"
   }
 }

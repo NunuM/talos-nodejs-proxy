@@ -2,7 +2,10 @@ import {Repository} from "./repository";
 import {ResponseStats} from "../model/response-stats";
 import {VirtualHost} from "../model/virtual-host";
 import {ApiGateway} from "../model/api-gateway";
-import {Gateway} from "../model/gateway";
+import {Gateway, GatewaysTypes} from "../model/gateway";
+import fs from "fs/promises";
+import {Config} from "../app/config";
+import {LOGGER} from "../service/logger-service";
 
 /**
  * @class
@@ -21,6 +24,96 @@ export class InMemoryRepository implements Repository {
         this._hosts = new Map<string, VirtualHost>();
         this._stats = new Map<string, any>;
         this._apisGetaways = new Map<string, ApiGateway>();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    async connect(): Promise<void> {
+
+        const repository = Config.repository();
+
+        if (repository.type === 'file') {
+
+            try {
+                await fs.access(repository.filePath);
+            } catch (error) {
+                //@ts-ignore
+                if (error && error.code === 'ENOENT') {
+                    try {
+                        const toStore: { [key: string]: any[] } = {
+                            [GatewaysTypes.ApiGateway]: [],
+                            [GatewaysTypes.VirtualHost]: []
+                        };
+                        await fs.writeFile(repository.filePath, JSON.stringify(toStore), {encoding: 'utf8'});
+                        return void 0;
+                    } catch (e) {
+                        LOGGER.error("Error creating default file repository", e);
+
+                        throw e;
+                    }
+                } else {
+                    throw error;
+                }
+            }
+
+            try {
+
+                const gateways = JSON.parse((await fs.readFile(repository.filePath)).toString('utf8'));
+
+                for (let virtualHost of (gateways.virtualHost || [])) {
+                    const vHost = VirtualHost.fromJSONObject(virtualHost);
+
+                    if (vHost) {
+                        this._hosts.set(vHost.id(), vHost);
+                    } else {
+                        LOGGER.warn("Error create virtual host instance:", virtualHost);
+                    }
+                }
+
+                for (let apiGateway of (gateways.apiGateway || [])) {
+                    const api = ApiGateway.fromJSONObject(apiGateway);
+
+                    if (api) {
+                        this._apisGetaways.set(api.id(), api);
+                    } else {
+                        LOGGER.warn("Error create API gateway instance:", apiGateway);
+                    }
+                }
+
+            } catch (e) {
+                LOGGER.error("Error loading gateways from file:", repository, ', error:', e);
+
+                throw e;
+            }
+
+            return void 0;
+        } else if (repository.type === 'memory') {
+            return void 0;
+        }
+
+
+        throw new Error("Trying to initialize file repository with wrong type");
+    }
+
+    /**
+     * @inheritDoc
+     */
+    getGatewayById(domain: string): Promise<Gateway | undefined> {
+        if (this._hosts.has(domain)) {
+            return Promise.resolve(this._hosts.get(domain));
+        } else if (this._apisGetaways.has(domain)) {
+            return Promise.resolve(this._apisGetaways.get(domain));
+        } else {
+            return Promise.resolve(undefined);
+        }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    existsGateway(domain: string): Promise<boolean> {
+        return Promise.resolve(this._hosts.has(domain) || this._apisGetaways.has(domain));
     }
 
     /**
@@ -54,7 +147,11 @@ export class InMemoryRepository implements Repository {
      * @inheritDoc
      */
     private removeVirtualHost(host: string): Promise<boolean> {
-        return Promise.resolve(this._hosts.delete(host));
+        if (this._hosts.delete(host)) {
+            return this.store();
+        }
+
+        return Promise.resolve(false);
     }
 
     /**
@@ -85,7 +182,7 @@ export class InMemoryRepository implements Repository {
      */
     private saveVirtualHost(virtualHost: VirtualHost): Promise<boolean> {
         this._hosts.set(virtualHost.id(), virtualHost);
-        return Promise.resolve(true);
+        return this.store();
     }
 
     /**
@@ -93,7 +190,7 @@ export class InMemoryRepository implements Repository {
      */
     private saveApiGateway(apiGateway: ApiGateway): Promise<boolean> {
         this._apisGetaways.set(apiGateway.domain, apiGateway);
-        return Promise.resolve(true);
+        return this.store();
     }
 
     /**
@@ -135,6 +232,30 @@ export class InMemoryRepository implements Repository {
             return this.saveApiGateway(gateway);
         } else {
             return Promise.resolve(false);
+        }
+    }
+
+    private async store(): Promise<boolean> {
+
+        const repository = Config.repository();
+
+        if (repository.type === 'file') {
+
+            const toStore: { [key: string]: any[] } = {[GatewaysTypes.ApiGateway]: [], [GatewaysTypes.VirtualHost]: []};
+
+            for (let vHost of this._hosts.values()) {
+                toStore[GatewaysTypes.VirtualHost].push(vHost.toJSON());
+            }
+
+            for (let api of this._apisGetaways.values()) {
+                toStore[GatewaysTypes.ApiGateway].push(api.toJSON());
+            }
+
+            await fs.writeFile(repository.filePath, JSON.stringify(toStore), {encoding: 'utf8'});
+
+            return true;
+        } else {
+            return repository.type === 'memory'
         }
     }
 }

@@ -1,0 +1,313 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "appId": {
+      "type": "string",
+      "maxLength": 50
+    },
+    "numberOfWorkers": {
+      "type": "number",
+      "default": 0
+    },
+    "proxy": {
+      "type": "object",
+      "properties": {
+        "globalMiddlewares": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 5
+          }
+        },
+        "servers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "port": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 65535
+              },
+              "protocol": {
+                "type": "string",
+                "enum": [
+                  "http",
+                  "https",
+                  "http2"
+                ]
+              },
+              "options": {
+                "type": "object"
+              }
+            },
+            "required": [
+              "port",
+              "protocol",
+              "options"
+            ]
+          }
+        }
+      },
+      "required": [
+        "globalMiddlewares",
+        "servers"
+      ]
+    },
+    "administration": {
+      "type": "object",
+      "properties": {
+        "port": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 65535
+        },
+        "bindOnlyLocalhost": {
+          "type": "boolean"
+        },
+        "authenticator": {
+          "type": "object",
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "enum": [
+                    "none"
+                  ]
+                }
+              },
+              "required": [
+                "type"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "enum": [
+                    "basic"
+                  ]
+                },
+                "username": {
+                  "type": "string"
+                },
+                "password": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "username",
+                "password"
+              ]
+            }
+          ]
+        }
+      },
+      "required": [
+        "port",
+        "bindOnlyLocalhost",
+        "authenticator"
+      ]
+    },
+    "repository": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "enum": [
+                "memory"
+              ]
+            }
+          },
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "enum": [
+                "file"
+              ]
+            },
+            "filePath": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "filePath"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "enum": [
+                "redis"
+              ]
+            },
+            "redisConnectionString": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "redisConnectionString"
+          ]
+        }
+      ]
+    },
+    "alarmist": {
+      "type": "object",
+      "properties": {
+        "smtpServer": {
+          "type": "string"
+        },
+        "smtpPort": {
+          "type": "number"
+        },
+        "senderEmail": {
+          "type": "string"
+        },
+        "subject": {
+          "type": "string"
+        },
+        "recipients": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "errorEmailTemplateFile": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "smtpServer",
+        "smtpPort",
+        "senderEmail",
+        "subject",
+        "recipients",
+        "errorEmailTemplateFile"
+      ]
+    },
+    "logging": {
+      "type": "object",
+      "properties": {
+        "proxy": {
+          "type": "object",
+          "properties": {
+            "level": {
+              "type": "string",
+              "enum": [
+                "off",
+                "fatal",
+                "error",
+                "warn",
+                "info",
+                "debug",
+                "trace",
+                "all"
+              ]
+            }
+          },
+          "required": [
+            "level"
+          ]
+        },
+        "accessLog": {
+          "type": "object",
+          "properties": {
+            "level": {
+              "type": "string",
+              "enum": [
+                "off",
+                "fatal",
+                "error",
+                "warn",
+                "info",
+                "debug",
+                "trace",
+                "all"
+              ]
+            },
+            "logDirectory": {
+              "type": "string"
+            },
+            "format": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "level",
+            "logDirectory",
+            "format"
+          ]
+        },
+        "admin": {
+          "type": "object",
+          "properties": {
+            "level": {
+              "type": "string",
+              "enum": [
+                "off",
+                "fatal",
+                "error",
+                "warn",
+                "info",
+                "debug",
+                "trace",
+                "all"
+              ]
+            }
+          },
+          "required": [
+            "level"
+          ]
+        },
+        "worker": {
+          "type": "object",
+          "properties": {
+            "level": {
+              "type": "string",
+              "enum": [
+                "off",
+                "fatal",
+                "error",
+                "warn",
+                "info",
+                "debug",
+                "trace",
+                "all"
+              ]
+            }
+          },
+          "required": [
+            "level"
+          ]
+        }
+      },
+      "required": [
+        "proxy",
+        "accessLog",
+        "admin",
+        "worker"
+      ]
+    }
+  },
+  "required": [
+    "appId",
+    "proxy",
+    "administration",
+    "repository",
+    "logging"
+  ]
+}

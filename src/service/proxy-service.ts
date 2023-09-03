@@ -6,7 +6,6 @@ import {GatewayHostService} from "./gateway-host-service";
 import {Config} from "../app/config";
 import {ProxyError} from "../exceptions/proxy-error";
 import {Middleware} from "../middleware/middleware";
-import {AccessLoggingMiddleware} from "../middleware/access-logging-middleware";
 import {ServerRequest} from "../model/request";
 import {ServerResponse} from "../model/response";
 import {Protocol} from "../model/protocol";
@@ -15,7 +14,7 @@ import http from "http";
 import https from "https";
 import http2 from "http2";
 import {MiddlewareProcessor} from "../middleware/middleware-processor";
-import {EncodingMiddleware} from "../middleware/encoding-middleware";
+import {MiddlewareFactory} from "../middleware/middleware-registry";
 
 export class ProxyService {
 
@@ -24,23 +23,26 @@ export class ProxyService {
 
     constructor(private _gatewayHostService: GatewayHostService) {
         this._proxies = new Map<Protocol, Proxy>();
-        this._middlewares = [
-            new AccessLoggingMiddleware(),
-            new EncodingMiddleware()
-        ];
+        this._middlewares = [];
     }
 
-    init() {
-        if (Config.withHttp()) {
-            this.httpProxy(Config.httpServerPort(), Config.httpServerOptions());
+    loadFromConfig() {
+
+        const proxyConf = Config.proxyConfigs();
+
+        for (let globalMiddleware of proxyConf.globalMiddlewares) {
+            //@ts-ignore
+            this._middlewares.push(MiddlewareFactory[globalMiddleware]());
         }
 
-        if (Config.withHttps()) {
-            this.httpsProxy(Config.httpsServerPort(), Config.httpsServerOptions());
-        }
-
-        if (Config.withHttp2()) {
-            this.http2Proxy(Config.http2ServerPort(), Config.http2ServerOptions());
+        for (let server of proxyConf.servers) {
+            if (server.protocol === 'http') {
+                this.httpProxy(server.port, server.options);
+            } else if (server.protocol === 'https') {
+                this.httpsProxy(server.port, server.options);
+            } else if (server.protocol === 'http2') {
+                this.http2Proxy(server.port, server.options);
+            }
         }
     }
 
@@ -93,25 +95,33 @@ export class ProxyService {
             let clientHeader: string | string[] | undefined = proxyRequest.host;
 
             if (Array.isArray(clientHeader)) {
-                proxyResponse.endWithStatus(404);
+                this.handleInvalidHostHeader(clientHeader, proxyRequest, proxyResponse);
                 return;
             }
 
             if (!clientHeader) {
-                proxyResponse.endWithStatus(404);
+                this.handleInvalidHostHeader(clientHeader, proxyRequest, proxyResponse);
                 return;
             }
 
-            this.handleRequest(clientHeader, proxyRequest, proxyResponse);
+            this.handleRequest(clientHeader.toLowerCase(), proxyRequest, proxyResponse);
         }
     }
 
     private handleRequest(clientHeader: string, proxyRequest: ServerRequest, proxyResponse: ServerResponse) {
 
-        const processor = new MiddlewareProcessor(this._middlewares);
+        const processor = new MiddlewareProcessor(this._middlewares, this._gatewayHostService);
 
         processor.pre(clientHeader, proxyRequest, proxyResponse, () => {
             this.gatewayRequest(processor, clientHeader, proxyRequest, proxyResponse);
+        });
+    }
+
+    private handleInvalidHostHeader(clientHeader: any, proxyRequest: ServerRequest, proxyResponse: ServerResponse) {
+        const processor = new MiddlewareProcessor(this._middlewares, this._gatewayHostService);
+
+        processor.pre(clientHeader, proxyRequest, proxyResponse, () => {
+            proxyResponse.endWithStatus(400);
         });
     }
 
@@ -119,6 +129,8 @@ export class ProxyService {
                            clientHeader: string,
                            proxyRequest: ServerRequest,
                            proxyResponse: ServerResponse) {
+
+        LOGGER.debug('Resolving gateway for domain', clientHeader);
 
         this.gatewayHostService
             .resolveGateway(clientHeader)
@@ -135,5 +147,4 @@ export class ProxyService {
                 }
             });
     }
-
 }

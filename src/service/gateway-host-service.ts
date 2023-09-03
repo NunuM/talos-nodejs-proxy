@@ -3,11 +3,10 @@ import {VirtualHost} from "../model/virtual-host";
 import {Gateway} from "../model/gateway";
 import {GatewayNotFoundError} from "../exceptions/gateway-not-found-error";
 
-const {EventEmitter} = require('events');
+import {EventEmitter} from 'events';
 
 /** project imports */
-const {ResponseStats} = require('../model/response-stats');
-const {LOGGER} = require('./logger-service');
+import {ResponseStats} from '../model/response-stats';
 
 /**
  * @class
@@ -36,6 +35,16 @@ export class GatewayHostService extends EventEmitter {
         return Array(...this._regexBasedHosts).concat(...this._wellDefinedHosts.values());
     }
 
+
+    exists(domain: string): boolean {
+        for (let gatewayHost of this.gatewayHosts()) {
+            if (gatewayHost.domain === domain) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Adds new virtual host
      */
@@ -53,12 +62,6 @@ export class GatewayHostService extends EventEmitter {
         } else {
             this._wellDefinedHosts.set(gateway.domain, gateway);
         }
-
-        /**
-         * When a new host needs to be persisted
-         * @event VirtualHostService#host
-         */
-        this.emit('gateway', gateway);
     }
 
 
@@ -96,8 +99,6 @@ export class GatewayHostService extends EventEmitter {
             }
         }
 
-        LOGGER.warn('Not found requested host:', hostHeaderValue);
-
         throw new GatewayNotFoundError(`Gateway not found for domain:${hostHeaderValue}`);
     }
 
@@ -121,21 +122,21 @@ export class GatewayHostService extends EventEmitter {
      * Remove virtual host
      *
      * @fires VirtualHostService#delete
-     * @param {string} host
+     * @param {string} domain
      */
-    removeVirtualHostByKey(host: string) {
+    removeVirtualHostByKey(domain: string): boolean {
 
         let gateway;
 
-        if (this._wellDefinedHosts.has(host)) {
+        if (this._wellDefinedHosts.has(domain)) {
 
-            gateway = this._wellDefinedHosts.get(host);
+            gateway = this._wellDefinedHosts.get(domain);
 
-            this._wellDefinedHosts.delete(host);
+            this._wellDefinedHosts.delete(domain);
 
         } else {
 
-            gateway = this._regexBasedHosts.find(v => v.domain === host);
+            gateway = this._regexBasedHosts.find(v => v.domain === domain);
 
             if (gateway) {
                 this._regexBasedHosts.splice(this._regexBasedHosts.indexOf(gateway), 1);
@@ -146,6 +147,11 @@ export class GatewayHostService extends EventEmitter {
          * When virtual host is removed
          * @event virtualHosts#delete
          */
-        super.emit('delete', gateway);
+        if (gateway) {
+            super.emit('delete', gateway);
+            return true;
+        }
+
+        return false;
     }
 }

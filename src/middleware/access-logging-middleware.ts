@@ -4,12 +4,12 @@ import {UpstreamHost} from "../model/upstream-host";
 import {ServerRequest} from "../model/request";
 import {ClientResponse, ServerResponse} from "../model/response";
 import {ProxyRequestOptions} from "../model/proxy-request-options";
+import {MiddlewareRegistry} from "./middleware-registry";
 
 export class AccessLoggingMiddleware implements Middleware {
 
     onProxyRequest(proxyRequest: ServerRequest, proxyResponse: ServerResponse, next: () => void): void {
-        //handler(proxyRequest.getTransport(), proxyResponse.getTransport(), next);
-        next();
+        handler(proxyRequest.getTransport(), proxyResponse.getTransport(), next);
     }
 
     preUpstreamRequest(upstream: UpstreamHost, options: ProxyRequestOptions, proxyResponse: ServerResponse, next: () => void): void {
@@ -22,5 +22,9 @@ export class AccessLoggingMiddleware implements Middleware {
 
     onProxyResponse(proxyResponse: ServerResponse, next: () => void) {
         next();
+    }
+
+    serialize(): any {
+        return MiddlewareRegistry.AccessLogging;
     }
 }

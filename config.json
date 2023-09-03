@@ -1,22 +1,46 @@
 {
-  "appId": "proxy",
-  "smtpServer": "smtp.nunum.me",
-  "errorEmailRecipients": "my@email",
-  "errorEmailTemplateFile" : "./template/email.html",
-  "logDirectory": "./",
-  "logAccessFormat": ":remote-addr - \":method :url HTTP/:http-version\" :status :content-length \":referrer\" \":user-agent\" :response-time",
-  "loggingFormat": "%[%[[%p]%] %[[%c]%] - %m",
-  "logLevel": "info",
-  "withHttp": true,
-  "withHttps": true,
-  "withHttp2": false,
-  "serverPort": 8000,
-  "serverHttpsPort": 8001,
-  "sslKey": "./ssl/key3.pem",
-  "sslCert": "./ssl/cert3.pem",
-  "serverAdminUIPort": 7777,
-  "serverAdminPassword": "cm9vdDpyb290",
-  "repository": "memory",
-  "redisConnectionString": "[redis[s]:]//[[user][:password@]][host][:port][/db-number][?db=db-number[&password=bar[&option=value]]]",
-  "socketTimeout": 30000
+  "appId": "string",
+  "numberOfWorkers": 0,
+  "proxy": {
+    "globalMiddlewares": [
+      0
+    ],
+    "servers": [
+      {
+        "port": 8080,
+        "protocol": "http",
+        "options": {}
+      }
+    ],
+    "gateways": []
+  },
+  "administration": {
+    "port": 7777,
+    "bindOnlyLocalhost": true,
+    "authenticator": {
+      "type": "basic",
+      "username": "nuno",
+      "password": "test"
+    }
+  },
+  "repository": {
+    "type": "file",
+    "filePath": "gateways.json"
+  },
+  "logging": {
+    "accessLog": {
+      "level": "info",
+      "format": ":remote-addr - \":method :url HTTP/:http-version\" :status :content-length \":referrer\" \":user-agent\" :response-time :req[host] \":req[x-correlation-id]\"",
+      "logDirectory": "./"
+    },
+    "proxy": {
+      "level": "info"
+    },
+    "admin": {
+      "level": "info"
+    },
+    "worker": {
+      "level": "info"
+    }
+  }
 }

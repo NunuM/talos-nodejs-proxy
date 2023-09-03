@@ -4,14 +4,18 @@ import {ServerRequest} from "../model/request";
 import {ClientResponse, ProxyResponse, ServerResponse} from "../model/response";
 import {ProxyRequestOptions} from "../model/proxy-request-options";
 import {LOGGER} from "../service/logger-service";
+import {GatewayHostService} from "../service/gateway-host-service";
+import {GatewayStatsCollectorMiddlewareFactory} from "./factory/gateway-stats-collector-middleware-factory";
 
 
 export class MiddlewareProcessor {
 
+    private readonly _service: GatewayHostService;
     private readonly _middlewares: Middleware[];
 
-    constructor(middlewares: Middleware[]) {
+    constructor(middlewares: Middleware[], service: GatewayHostService) {
         this._middlewares = middlewares;
+        this._service = service;
     }
 
     get size(): number {
@@ -19,7 +23,12 @@ export class MiddlewareProcessor {
     }
 
     append(middleware: Middleware[]): void {
-        this._middlewares.push(...middleware);
+        this._middlewares.push(...middleware.map((m) => {
+            if (m instanceof GatewayStatsCollectorMiddlewareFactory) {
+                return m.build(this._service);
+            }
+            return m;
+        }));
     }
 
     pre(clientHeader: string, request: ServerRequest, response: ServerResponse, nextStage: () => void, idx = 0) {

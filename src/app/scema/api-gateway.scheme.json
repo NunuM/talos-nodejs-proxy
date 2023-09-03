@@ -1,0 +1,84 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "domain": {
+      "type": "string",
+      "maxLength": 50
+    },
+    "name": {
+      "type": "string",
+      "maxLength": 100
+    },
+    "loadBalancer": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "requestTimeout": {
+      "type": "integer"
+    },
+    "routesToUpstreamHosts": {
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+          "type": "array",
+          "items": [
+            {
+              "type": "object",
+              "properties": {
+                "host": {
+                  "type": "string"
+                },
+                "port": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 65535
+                },
+                "isAlive": {
+                  "type": "boolean",
+                  "default": true
+                },
+                "isHTTPS": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "isHTTP2": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "isHTTP": {
+                  "type": "boolean",
+                  "default": false
+                }
+              },
+              "required": [
+                "host",
+                "port",
+                "isHTTPS",
+                "isHTTP2",
+                "isHTTP"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "middlewares": {
+      "type": "array",
+      "items": [
+        {
+          "type": "integer"
+        }
+      ]
+    }
+  },
+  "required": [
+    "domain",
+    "name",
+    "loadBalancer",
+    "requestTimeout",
+    "routesToUpstreamHosts",
+    "middlewares"
+  ]
+}

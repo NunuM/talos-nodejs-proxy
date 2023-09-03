@@ -1,18 +1,16 @@
-import {Gateway} from "./gateway";
+import {Gateway, GatewaysTypes} from "./gateway";
 import {UpstreamHost} from "./upstream-host";
 import {LOGGER} from "../service/logger-service";
-import {LoadBalancer} from "../load_balancer/load-balancer";
 import {LoadBalancerFactory, LoadBalancerType} from "../load_balancer/load-balancer-type";
 import {Identifiable} from "pluto-http-client/dist/framework/identifiable";
 import {TimeUnit} from "pluto-http-client";
 import {ServerRequest} from "./request";
+import {MiddlewareFactory} from "../middleware/middleware-registry";
+import {Middleware} from "../middleware/middleware";
 
 export class ApiGateway extends Gateway implements Identifiable {
 
-    private readonly _domain: string;
-    private readonly _name: string;
     private readonly _regex?: RegExp;
-    private readonly _loadBalancer: LoadBalancer;
     private readonly _wellDefinedRoutesToUpstreamHosts: Map<string, UpstreamHost[]>;
     private readonly _regexRoutesToUpstreamHosts: Map<RegExp, UpstreamHost[]>;
 
@@ -20,11 +18,9 @@ export class ApiGateway extends Gateway implements Identifiable {
                 name: string,
                 loadBalancing: LoadBalancerType,
                 routesToUpstreamHosts: Map<string | RegExp, UpstreamHost[]>,
-                private _requestSocketTimeout: number = 5 * TimeUnit.Seconds) {
-        super();
-        this._domain = domain;
-        this._name = name;
-        this._loadBalancer = LoadBalancerFactory.getLoadBalancer(loadBalancing);
+                middlewares: Middleware[] = [],
+                requestTimeout: number = 1 * TimeUnit.Minutes) {
+        super(domain, name, LoadBalancerFactory.getLoadBalancer(loadBalancing), middlewares, requestTimeout);
         this._wellDefinedRoutesToUpstreamHosts = new Map<string, UpstreamHost[]>();
         this._regexRoutesToUpstreamHosts = new Map<RegExp, UpstreamHost[]>();
 
@@ -48,19 +44,11 @@ export class ApiGateway extends Gateway implements Identifiable {
     }
 
     id(): string {
-        return this._domain;
-    }
-
-    get name(): string {
-        return this._name;
-    }
-
-    get domain(): string {
-        return this._domain;
+        return this.domain;
     }
 
     get isRegexBased(): boolean {
-        return this._domain.includes("*");
+        return this.domain.includes("*");
     }
 
     get wellDefinedRoutesToUpstreamHosts(): Map<string, UpstreamHost[]> {
@@ -69,10 +57,6 @@ export class ApiGateway extends Gateway implements Identifiable {
 
     get regexRoutesToUpstreamHosts(): Map<RegExp, UpstreamHost[]> {
         return this._regexRoutesToUpstreamHosts;
-    }
-
-    get requestTimeout(): number {
-        return this._requestSocketTimeout;
     }
 
     clone(domain: string): Gateway {
@@ -90,8 +74,10 @@ export class ApiGateway extends Gateway implements Identifiable {
         return new ApiGateway(
             domain,
             this.name,
-            this._loadBalancer.type,
-            map
+            this.loadBalancer.type,
+            map,
+            this.middlewares,
+            this.requestTimeout
         );
     }
 
@@ -114,7 +100,7 @@ export class ApiGateway extends Gateway implements Identifiable {
 
             LOGGER.trace("found match for path:", path, someHosts);
 
-            const nextHost: UpstreamHost | undefined = this._loadBalancer.nextHost(someHosts);
+            const nextHost: UpstreamHost | undefined = this.loadBalancer.nextHost(someHosts);
             if (nextHost) {
                 return nextHost;
             }
@@ -125,7 +111,7 @@ export class ApiGateway extends Gateway implements Identifiable {
 
                 LOGGER.trace("found match for regex path:", path, hosts);
 
-                const nextHost: UpstreamHost | undefined = this._loadBalancer.nextHost(hosts);
+                const nextHost: UpstreamHost | undefined = this.loadBalancer.nextHost(hosts);
                 if (nextHost) {
                     return nextHost;
                 }
@@ -152,8 +138,6 @@ export class ApiGateway extends Gateway implements Identifiable {
         }
 
         return result;
-
-        return Promise.resolve(false);
     }
 
     /**
@@ -174,21 +158,28 @@ export class ApiGateway extends Gateway implements Identifiable {
         }
 
         return {
-            domain: this._domain,
-            name: this._name,
-            load_balancer: this._loadBalancer.type,
-            socket_timeout: this.requestTimeout,
-            routes_to_upstream_hosts: upstreams
+            type: GatewaysTypes.ApiGateway,
+            domain: this.domain,
+            name: this.name,
+            loadBalancer: this.loadBalancer.type,
+            requestTimeout: this.requestTimeout,
+            routesToUpstreamHosts: upstreams,
+            middlewares: this.middlewares.map((m) => m.serialize()),
         }
     }
 
-    static fromJSONString(data: string): ApiGateway | undefined {
+
+    /**
+     * Create instance from object
+     * @param obj
+     */
+    static fromJSONObject(obj: ApiGatewayObjectDefinition): ApiGateway | undefined {
 
         try {
-            const json = JSON.parse(data);
+
             const routes = new Map<string | RegExp, UpstreamHost[]>();
 
-            for (const [route, upstreams] of Object.entries(json.routes_to_upstream_hosts)) {
+            for (const [route, upstreams] of Object.entries(obj.routesToUpstreamHosts)) {
 
                 //@ts-ignore
                 let upstreamHosts = (upstreams || []).map((upstream) => {
@@ -210,17 +201,46 @@ export class ApiGateway extends Gateway implements Identifiable {
                 }
             }
 
+            // @ts-ignore
+            const middlewares = (obj.middlewares || []).map((m) => MiddlewareFactory[m](obj.domain));
+
             return new ApiGateway(
-                json.domain,
-                json.name,
-                json.load_balancer,
+                obj.domain,
+                obj.name,
+                obj.loadBalancer,
                 routes,
-                json.socket_timeout
+                middlewares,
+                obj.requestTimeout
             );
         } catch (e) {
-            LOGGER.error("Error deserializing api", data, e)
+            LOGGER.error("Error creating api gateway instance", obj, e);
         }
 
         return undefined;
     }
+
+    static fromJSONString(data: string): ApiGateway | undefined {
+
+        try {
+            const json = JSON.parse(data);
+
+            return ApiGateway.fromJSONObject(json);
+
+        } catch (e) {
+            LOGGER.error("Error deserializing api gateway from raw string", data, e);
+        }
+
+        return undefined;
+    }
+}
+
+
+export interface ApiGatewayObjectDefinition {
+    type: string;
+    domain: string;
+    name: string;
+    loadBalancer: number,
+    routesToUpstreamHosts: { [key: string]: Array<{ host: string; port: number, isAlive: boolean, isHTTPS: boolean, isHTTP2: boolean, isHTTP: boolean }> }
+    middlewares: number[];
+    requestTimeout: number;
 }
