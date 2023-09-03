@@ -6,7 +6,6 @@
       "ES2021"
     ],
     "allowJs": true,
-    "rootDir": "src",
     "strict": true,
     "noImplicitAny": true,
     "esModuleInterop": true,

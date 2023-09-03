@@ -4,6 +4,7 @@ import {Socket} from "net";
 import {Proxy} from "./proxy";
 import {Http1Request, ServerRequest} from "../model/request";
 import {Http1Response, ServerResponse} from "../model/response";
+import fs from "fs";
 
 
 export class HttpsProxy implements Proxy {
@@ -22,7 +23,15 @@ export class HttpsProxy implements Proxy {
      * @inheritDoc
      */
     start(handler: (request: ServerRequest, response: ServerResponse) => void) {
-        this._server = https.createServer(this._options, (req, res) => {
+
+        const optionsWithCerts = Object.assign(this._options, {
+            //@ts-ignore
+            key: fs.readFileSync(this._options.key),
+            //@ts-ignore
+            cert: fs.readFileSync(this._options.cert)
+        });
+
+        this._server = https.createServer(optionsWithCerts, (req, res) => {
 
             handler(new Http1Request(req), new Http1Response(res));
 

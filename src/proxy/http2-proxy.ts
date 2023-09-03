@@ -4,6 +4,7 @@ import {Http2CompatibleModeRequest, Http2Request, ServerRequest} from "../model/
 import {Http2CompatibleModeResponse, Http2Response, ServerResponse} from "../model/response";
 import {LOGGER} from "../service/logger-service";
 import {protocolFrom} from "../model/protocol";
+import fs from "fs";
 
 
 export class Http2Proxy implements Proxy {
@@ -23,15 +24,22 @@ export class Http2Proxy implements Proxy {
      */
     start(handler: (request: ServerRequest, response: ServerResponse) => void): void {
 
+        const optionsWithCerts = Object.assign(this._options, {
+            //@ts-ignore
+            key: fs.readFileSync(this._options.key),
+            //@ts-ignore
+            cert: fs.readFileSync(this._options.cert)
+        });
+
         if (this._options.allowHTTP1) {
-            this._server = http2.createSecureServer(this._options, (request, response) => {
+            this._server = http2.createSecureServer(optionsWithCerts, (request, response) => {
                 handler(
                     new Http2CompatibleModeRequest(request),
                     new Http2CompatibleModeResponse(response, protocolFrom(request))
                 );
             });
         } else {
-            this._server = http2.createSecureServer(this._options);
+            this._server = http2.createSecureServer(optionsWithCerts);
 
             this._server.on('stream', (stream, headers) => {
                 handler(new Http2Request(stream, headers), new Http2Response(stream));
