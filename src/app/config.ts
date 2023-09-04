@@ -6,9 +6,10 @@ import {Validator} from 'jsonschema'
 import appConfigurationSchema from './scema/app-config.schema.json';
 import path from 'path';
 import fs from "fs";
+import {MiddlewareRegistry} from "../middleware/middleware-registry";
 
 interface Proxy {
-    globalMiddlewares: number[],
+    globalMiddlewares: Array<{ type: MiddlewareRegistry, args: { [key: string]: any } }>,
     servers: Server[];
 }
 

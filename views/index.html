@@ -11,6 +11,15 @@
           href="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.12/angular-material.min.css">
 
     <style>
+
+        a {
+            text-decoration: none;
+        }
+
+        a:hover {
+            color: black;
+        }
+
         th, td {
             text-align: center;
             font-size: 16px;
@@ -50,12 +59,11 @@
 
             <ul style="background: white;">
                 <li style="padding: 10px 0 10px 0;" ng-repeat="gateway in gateways">
-                    {{gateway.domain}}
+                    <a href="#{{gateway.domain}}">{{gateway.domain}}</a>
                 </li>
             </ul>
 
         </md-toolbar>
-
 
     </md-sidenav>
 
@@ -125,9 +133,11 @@
 
                                 <md-input-container class="md-block" required>
                                     <label>Middlewares</label>
-                                    <md-select name="middlewares" ng-model="v.middlewares" multiple>
-                                        <md-option ng-repeat="middleware in middlewares" ng-value="middleware.id">
-                                            {{middleware.name}}
+                                    <md-select name="middlewares"
+                                               ng-model="v.middlewares" multiple>
+                                        <md-option ng-repeat="middleware in middlewares"
+                                                   ng-value="middleware">
+                                            {{middleware.name}}({{middleware.arguments}})
                                         </md-option>
                                     </md-select>
                                 </md-input-container>
@@ -135,7 +145,7 @@
                                 <div flex layout="row" layout-align="space-between end">
                                     <h4 style="margin-top: 50px;">Upstream Hosts</h4>
                                     <md-button class="md-icon-button"
-                                               ng-click="v.upstreamHosts.push({host:'127.0.0.1',port:0})">
+                                               ng-click="v.upstreamHosts.push({host:'127.0.0.1',port:0,isHTTP:false,isHTTPS:false,isHTTP2:false})">
                                         <md-icon md-svg-src="assets/plus.svg"></md-icon>
                                     </md-button>
                                 </div>
@@ -256,9 +266,11 @@
 
                                 <md-input-container class="md-block" required>
                                     <label>Middlewares</label>
-                                    <md-select name="middlewares" ng-model="a.middlewares" multiple>
-                                        <md-option ng-repeat="middleware in middlewares" ng-value="middleware.id">
-                                            {{middleware.name}}
+                                    <md-select name="middlewares"
+                                               ng-model="a.middlewares" multiple>
+                                        <md-option ng-repeat="middleware in middlewares"
+                                                   ng-value="middleware">
+                                            {{middleware.name}}({{middleware.arguments}})
                                         </md-option>
                                     </md-select>
                                 </md-input-container>
@@ -291,7 +303,7 @@
                                         <div flex layout="row" layout-align="space-between end">
                                             <h5>Upstream Hosts</h5>
                                             <md-button class="md-icon-button"
-                                                       ng-click="r.upstreamHosts.push({host:'127.0.0.1',port:0})">
+                                                       ng-click="r.upstreamHosts.push({host:'127.0.0.1',port:0,isHTTP:false,isHTTPS:false,isHTTP2:false})">
                                                 <md-icon md-svg-src="assets/plus.svg"></md-icon>
                                             </md-button>
                                         </div>
@@ -360,7 +372,7 @@
             </div>
         </div>
 
-        <div layout="row" ng-repeat="gateway in gateways" flex="66" flex-offset="15">
+        <div id="{{gateway.domain}}" layout="row" ng-repeat="gateway in gateways" flex="66" flex-offset="15">
 
             <div layout="row" flex>
                 <section flex="100" class="md-whiteframe-2dp" style="border-radius: 4px;
@@ -435,8 +447,10 @@
                                 <p>
                                     <md-input-container class="md-block" required>
                                         <label>Middlewares</label>
-                                        <md-select name="middlewares" ng-model="gateway.middlewares" multiple>
-                                            <md-option ng-repeat="middleware in middlewares" ng-value="middleware.id">
+                                        <md-select name="middlewares"
+                                                   ng-model="gateway.middlewares" multiple
+                                                   ng-model-options="{ trackBy: '$value.id' }">
+                                            <md-option ng-repeat="middleware in middlewares" ng-value="middleware">
                                                 {{middleware.name}}
                                             </md-option>
                                         </md-select>
@@ -448,7 +462,7 @@
                                         <div flex layout="row" layout-align="space-between end">
                                             <h4 style="margin-top: 10px;">Routes</h4>
                                             <md-button class="md-icon-button"
-                                                       ng-click="gateway.routes.push({route:'/route',isRegex:false, upstreamHosts:[{host:'127.0.0.1',port:0}]})">
+                                                       ng-click="gateway.routes.push({route:'/route',isRegex:false, upstreamHosts:[{host:'127.0.0.1',port:0,isHTTP:false,isHTTPS:false,isHTTP2:false}]})">
                                                 <md-icon md-svg-src="assets/plus.svg"></md-icon>
                                             </md-button>
                                         </div>
@@ -477,7 +491,7 @@
                                                 <div flex layout="row" layout-align="space-between end">
                                                     <h5>Upstream Hosts</h5>
                                                     <md-button class="md-icon-button"
-                                                               ng-click="r.upstreamHosts.push({host:'127.0.0.1',port:0})">
+                                                               ng-click="r.upstreamHosts.push({host:'127.0.0.1',port:0,isHTTP:false,isHTTPS:false,isHTTP2:false})">
                                                         <md-icon md-svg-src="assets/plus.svg"></md-icon>
                                                     </md-button>
                                                 </div>
@@ -547,7 +561,7 @@
                                         <div flex layout="row" layout-align="space-between end">
                                             <h4 style="margin-top: 10px;">Upstream Hosts</h4>
                                             <md-button class="md-icon-button"
-                                                       ng-click="gateway.upstreamHosts.push({host:'127.0.0.1',port:0})">
+                                                       ng-click="gateway.upstreamHosts.push({host:'127.0.0.1',port:0,isHTTP:false,isHTTPS:false,isHTTP2:false})">
                                                 <md-icon md-svg-src="assets/plus.svg"></md-icon>
                                             </md-button>
                                         </div>
@@ -640,234 +654,396 @@
 <script>
 
     angular.module('talosproxy', ['ngMaterial', 'ngMessages', 'ngCookies'])
-        .controller('proxyCtrl', ["$scope", "$http", "$mdToast", "$interval", function ($scope, $http, $mdToast, $interval) {
+        .controller('proxyCtrl', [
+            "$scope",
+            "$http",
+            "$mdToast",
+            "$interval",
+            '$mdDialog', function ($scope, $http, $mdToast, $interval, $mdDialog) {
 
-            const defaultHost = {
-                middlewares: [],
-                upstreamHosts: [{
-                    host: '127.0.0.1',
-                    port: 9090,
-                    isHTTP: false,
-                    isHTTPS: false,
-                    isHTTP2: false
-                }]
-            };
+                const defaultHost = {
+                    middlewares: [],
+                    upstreamHosts: [{
+                        host: '127.0.0.1',
+                        port: 9090,
+                        isHTTP: false,
+                        isHTTPS: false,
+                        isHTTP2: false
+                    }]
+                };
 
-            const defaultApiGateway = {
-                middlewares: [],
-                routes: [
-                    {
-                        route: '', upstreamHosts: [{
-                            host: '127.0.0.1', port: 9090,
-                            isHTTP: false,
-                            isHTTPS: false,
-                            isHTTP2: false
-                        }]
-                    }
-                ]
-            };
+                const defaultApiGateway = {
+                    middlewares: [],
+                    routes: [
+                        {
+                            route: '', upstreamHosts: [{
+                                host: '127.0.0.1', port: 9090,
+                                isHTTP: false,
+                                isHTTPS: false,
+                                isHTTP2: false
+                            }]
+                        }
+                    ]
+                };
 
-            $scope.v = JSON.parse(JSON.stringify(defaultHost));
-            $scope.a = JSON.parse(JSON.stringify(defaultApiGateway));
-            $scope.middlewares = [];
-            $scope.apiGateways = [];
+                $scope.middlewareChanged = (gateway) => {
 
-            $scope.showToast = function (message) {
-                $mdToast.show(
-                    $mdToast.simple()
-                        .position('top end')
-                        .textContent(message)
-                        .hideDelay(3000)
-                );
-            };
+                    if (gateway.middlewares.length > 0) {
+                        return new Promise((resolve, reject) => {
 
-            $scope.setRoutesAsArray = function (gateway) {
-                const arr = [];
-                for (let [route, hosts] of Object.entries(gateway.routesToUpstreamHosts || {})) {
-                    const isRegex = route.startsWith('r');
+                            const mid = (midx) => {
 
-                    if (isRegex) {
-                        route = route.substring(1);
-                    }
+                                const middleware = gateway.middlewares[midx];
 
-                    arr.push({
-                        route,
-                        isRegex,
-                        upstreamHosts: hosts
-                    })
-                }
-
-                gateway.routes = arr;
-
-
-                return gateway;
-            }
-
-            $scope.submitNewVirtualForm = () => {
-
-                $scope.v.loadBalancer = Number($scope.v.loadBalancer);
-
-                $http.post('api/v1/virtualhost', $scope.v)
-                    .then((response) => {
-                        $scope.gateways.unshift(response.data);
-                        $scope.v = JSON.parse(JSON.stringify(defaultHost));
-                        $scope.showToast('Host created with success');
-                    })
-                    .catch((error) => {
-                        console.debug("Error creating vHost", error);
-                        $scope.showToast('Error creating vHost');
-                    });
-            };
-
-            $scope.updateVirtualHost = function (gateway) {
-                $http.put('api/v1/virtualhost/' + gateway.domain, gateway)
-                    .then(() => {
-                        $scope.showToast('Update with success');
-                    })
-                    .catch((error) => {
-                        console.debug("Error updating vHost upstream", gateway, error);
-                        $scope.showToast('Error updating host');
-                    });
-            }
-
-
-            $scope.submitNewApiGateway = () => {
-
-                $scope.a.loadBalancer = Number($scope.a.loadBalancer);
-                $scope.a.routesToUpstreamHosts = {};
-
-                for (let route of $scope.a.routes) {
-                    let r = route.route;
-
-                    if (route.isRegex) {
-                        r = 'r' + r.split("/").join("\\\/").replace(/\*/g, '\.*')
-                    }
-
-                    $scope.a.routesToUpstreamHosts[r] = route.upstreamHosts;
-                }
-
-                //delete $scope.a.routes;
-
-                $http.post('api/v1/api-gateway', $scope.a)
-                    .then((response) => {
-                        $scope.gateways.unshift($scope.setRoutesAsArray(response.data));
-                        $scope.a = JSON.parse(JSON.stringify(defaultApiGateway));
-                        $scope.showToast('API Gateway created with success');
-                    })
-                    .catch((error) => {
-                        console.debug("Error creating API Gateway", error);
-                        $scope.showToast('Error API Gateway');
-                    })
-
-            }
-
-            $scope.updateApiGateway = function (gateway) {
-
-                const routes = {}
-                const payload = gateway;
-
-                for (let route of payload.routes) {
-                    let r = route.route
-                    if (route.isRegex) {
-                        r = 'r' + route.route;
-                    }
-                    routes[r] = route.upstreamHosts;
-                }
-                payload.routesToUpstreamHosts = routes;
-
-                $http.put('api/v1/api-gateway/' + gateway.domain, payload)
-                    .then(() => {
-                        $scope.showToast('Update with success');
-                    })
-                    .catch((error) => {
-                        console.debug("Error updating vHost upstream", error);
-                        $scope.showToast('Error updating host');
-                    });
-            };
-
-            $scope.deleteGateway = (gateway) => {
-
-                let url = gateway.type === 'apiGateway' ? 'api-gateway' : 'virtualhost';
-
-                $http.delete('api/v1/' + url + '/' + gateway.domain)
-                    .then(() => {
-                        console.debug('Deleted ' + gateway.domain + 'host');
-                        $scope.gateways = $scope.gateways.filter(g => g.domain !== gateway.domain);
-                        $scope.showToast('Gateway was deleted');
-                    })
-                    .catch((error) => {
-                        console.debug('Could not delete Gateway', gateway, error);
-                        $scope.showToast('Gateway was not deleted');
-                    });
-            };
-
-            $scope.deleteUpstreamFromForm = (ev, virtual, upstream) => {
-                if (virtual) {
-                    virtual.upstreamHosts = virtual
-                        .upstreamHosts
-                        .filter(u => !(u === upstream));
-                }
-            };
-
-            $http.get('api/v1/gateway')
-                .then((response) => {
-
-                    $scope.gateways = [...response.data.virtualHost, ...response.data.apiGateway.map((a) => $scope.setRoutesAsArray(a))];
-
-                    console.debug("hosts response", response);
-                })
-                .catch((error) => {
-                    console.debug("Error fetching VHosts", error);
-                    $scope.showToast('Could not get virtual hosts from the server');
-                });
-
-            $http.get('api/v1/middleware')
-                .then((response) => {
-                    $scope.middlewares.push(...response.data);
-                    console.debug("middleware response", response);
-                }).catch((error) => {
-                console.debug("Error fetching middlewares", error);
-                $scope.showToast('Could load middlewares from the server');
-            });
-
-            $scope.fetchStats = () => {
-                $http.get('api/v1/stats')
-                    .then((response) => {
-
-                        $scope.statusCodes = new Map();
-                        $scope.stats = response.data;
-
-                        for (const key in $scope.stats) {
-                            if (/[0-9]{3}$/.test(key)) {
-
-                                const vParts = key.split(':');
-                                const vKey = vParts[0];
-                                const vCode = vParts[1];
-
-                                if (!$scope.statusCodes.has(vKey)) {
-                                    $scope.statusCodes.set(vKey, []);
+                                if (!middleware) {
+                                    resolve(true);
+                                    return;
                                 }
 
-                                $scope.statusCodes.get(vKey).push(vCode + ':' + $scope.stats[key]);
+                                if (!middleware.isComplete) {
+
+                                    const keys = Object.keys(middleware.args);
+
+                                    if (keys.length > 0) {
+
+                                        const next = (idx) => {
+
+                                            const key = keys[idx];
+
+                                            if (!key) {
+                                                mid(midx + 1);
+                                                return;
+                                            }
+
+                                            const confirm = $mdDialog.prompt()
+                                                .title('Middleware Configuration')
+                                                .textContent(middleware.id)
+                                                .placeholder(middleware.args[key])
+                                                .ariaLabel(middleware.args[key].type)
+                                                .initialValue(middleware.args[key].default || '')
+                                                .required(middleware.args[key].required || false)
+                                                .ok('Ok')
+                                                .cancel('Cancel');
+
+                                            $mdDialog.show(confirm).then(function (result) {
+                                                middleware.isComplete = true;
+
+                                                if (middleware.args[key].type === 'number') {
+                                                    middleware.payload = {
+                                                        type: middleware.id,
+                                                        args: {
+                                                            [key]: Number(result)
+                                                        }
+                                                    }
+                                                } else {
+                                                    middleware.payload = {
+                                                        type: middleware.id,
+                                                        args: {
+                                                            [key]: result
+                                                        }
+                                                    }
+                                                }
+
+                                                next(idx + 1);
+                                            }, function () {
+                                                reject(new Error("Invalid middleware input"));
+                                            });
+                                        }
+
+                                        next(0);
+                                    } else {
+                                        middleware.payload = {
+                                            type: middleware.id,
+                                            args: {}
+                                        }
+                                        mid(midx + 1);
+                                    }
+                                }
                             }
+
+                            mid(0);
+                        });
+                    }
+                    return Promise.resolve(true);
+                }
+
+                $scope.v = JSON.parse(JSON.stringify(defaultHost));
+                $scope.a = JSON.parse(JSON.stringify(defaultApiGateway));
+                $scope.middlewares = [];
+                $scope.apiGateways = [];
+
+                $scope.showToast = function (message) {
+                    $mdToast.show(
+                        $mdToast.simple()
+                            .position('top end')
+                            .textContent(message)
+                            .hideDelay(3000)
+                    );
+                };
+
+                $scope.setRoutesAsArray = function (gateway) {
+                    const arr = [];
+                    for (let [route, hosts] of Object.entries(gateway.routesToUpstreamHosts || {})) {
+                        const isRegex = route.startsWith('r');
+
+                        if (isRegex) {
+                            route = route.substring(1);
                         }
 
-                        console.debug("stats response", response);
+                        arr.push({
+                            route,
+                            isRegex,
+                            upstreamHosts: hosts
+                        })
+                    }
+
+                    gateway.routes = arr;
+
+
+                    return gateway;
+                }
+
+                $scope.setMidId = (gateway) => {
+
+                    gateway.middlewares.forEach((m) => {
+                        m.id = m.type;
+                    });
+
+                    return gateway;
+                }
+
+                $scope.submitNewVirtualForm = () => {
+
+                    $scope.v.loadBalancer = Number($scope.v.loadBalancer);
+
+                    $scope.middlewareChanged($scope.v)
+                        .then(() => {
+
+                            const payload = JSON.parse(JSON.stringify($scope.v));
+
+                            payload.middlewares = $scope.v.middlewares.map((m) => m.payload);
+
+                            $http.post('api/v1/virtualhost', payload)
+                                .then((response) => {
+                                    $scope.gateways.unshift(
+                                        $scope.setMidId(response.data)
+                                    );
+                                    $scope.v = JSON.parse(JSON.stringify(defaultHost));
+                                    $scope.showToast('Host created with success');
+                                })
+                                .catch((error) => {
+                                    console.debug("Error creating vHost", error);
+                                    $scope.showToast('Error creating vHost');
+                                });
+
+
+                        }).catch((error) => {
+                        console.debug("Error creating vHost", error);
+                        $scope.showToast(error.toString());
+                    });
+                };
+
+                $scope.updateVirtualHost = function (gateway) {
+
+                    const payload = JSON.parse(JSON.stringify(gateway));
+
+                    $scope.middlewareChanged(payload)
+                        .then(() => {
+
+                            payload.middlewares = payload.middlewares.map((m) => m.payload);
+
+                            $http.put('api/v1/virtualhost/' + gateway.domain, payload)
+                                .then(() => {
+                                    $scope.showToast('Update with success');
+                                })
+                                .catch((error) => {
+                                    console.debug("Error updating vHost upstream", gateway, error);
+                                    $scope.showToast('Error updating host');
+                                });
+
+                        })
+                        .catch((error) => {
+                            console.debug("Error updating vHost upstream", gateway, error);
+                            $scope.showToast(error.toString());
+                        });
+                }
+
+
+                $scope.submitNewApiGateway = () => {
+
+                    $scope.a.loadBalancer = Number($scope.a.loadBalancer);
+
+                    $scope.middlewareChanged($scope.a)
+                        .then(() => {
+
+                            const payload = JSON.parse(JSON.stringify($scope.a));
+
+                            payload.middlewares = $scope.a.middlewares.map((m) => m.payload);
+                            payload.routesToUpstreamHosts = {};
+
+                            for (let route of payload.routes) {
+                                let r = route.route;
+
+                                if (route.isRegex) {
+                                    r = 'r' + r.split("/").join("\\\/").replace(/\*/g, '\.*')
+                                }
+
+                                payload.routesToUpstreamHosts[r] = route.upstreamHosts;
+                            }
+
+                            //delete $scope.a.routes;
+
+                            $http.post('api/v1/api-gateway', payload)
+                                .then((response) => {
+                                    $scope.gateways.unshift(
+                                        $scope.setMidId($scope.setRoutesAsArray(response.data))
+                                    );
+                                    $scope.a = JSON.parse(JSON.stringify(defaultApiGateway));
+                                    $scope.showToast('API Gateway created with success');
+                                })
+                                .catch((error) => {
+                                    console.debug("Error creating API Gateway", error);
+                                    $scope.showToast('Error API Gateway');
+                                })
+
+                        })
+                        .catch((error) => {
+                            console.debug("Error creating API Gateway", error);
+                            $scope.showToast(error.toString());
+                        });
+                }
+
+                $scope.updateApiGateway = function (gateway) {
+
+                    const routes = {}
+
+                    const payload = JSON.parse(JSON.stringify(gateway));
+
+                    $scope.middlewareChanged(payload)
+                        .then(() => {
+
+                            payload.middlewares = payload.middlewares.map((m) => m.payload);
+
+                            for (let route of payload.routes) {
+                                let r = route.route
+                                if (route.isRegex) {
+                                    r = 'r' + route.route;
+                                }
+                                routes[r] = route.upstreamHosts;
+                            }
+                            payload.routesToUpstreamHosts = routes;
+
+                            $http.put('api/v1/api-gateway/' + gateway.domain, payload)
+                                .then(() => {
+                                    $scope.showToast('Update with success');
+                                })
+                                .catch((error) => {
+                                    console.debug("Error updating vHost upstream", error);
+                                    $scope.showToast('Error updating host');
+                                });
+
+                        }).catch((error) => {
+                        console.debug("Error updating vHost upstream", error);
+                        $scope.showToast(error.toString());
+                    });
+                };
+
+                $scope.deleteGateway = (gateway) => {
+
+                    let url = gateway.type === 'apiGateway' ? 'api-gateway' : 'virtualhost';
+
+                    $http.delete('api/v1/' + url + '/' + gateway.domain)
+                        .then(() => {
+                            console.debug('Deleted ' + gateway.domain + 'host');
+                            $scope.gateways = $scope.gateways.filter(g => g.domain !== gateway.domain);
+                            $scope.showToast('Gateway was deleted');
+                        })
+                        .catch((error) => {
+                            console.debug('Could not delete Gateway', gateway, error);
+                            $scope.showToast('Gateway was not deleted');
+                        });
+                };
+
+                $scope.deleteUpstreamFromForm = (ev, virtual, upstream) => {
+                    if (virtual) {
+                        virtual.upstreamHosts = virtual
+                            .upstreamHosts
+                            .filter(u => !(u === upstream));
+                    }
+                };
+
+                $http.get('api/v1/middleware')
+                    .then((response) => {
+                        $scope.middlewares.push(
+                            ...response.data
+                                .filter(m => !m.global)
+                                .map((m) => {
+                                    m.arguments = Object.keys(m.args).join(',');
+                                    return m;
+                                })
+                        );
+                        console.debug("middleware response", response);
+                    }).catch((error) => {
+                    console.debug("Error fetching middlewares", error);
+                    $scope.showToast('Could load middlewares from the server');
+                });
+
+                $http.get('api/v1/gateway')
+                    .then((response) => {
+
+                        $scope.gateways = [
+                            ...response.data.virtualHost,
+                            ...response.data.apiGateway.map((a) => $scope.setRoutesAsArray(a))
+                        ].map((g) => {
+                            return $scope.setMidId(g);
+                        });
+
+                        console.debug("hosts response", response);
                     })
                     .catch((error) => {
-                        console.debug("Error fetching stats", error);
-                        $scope.showToast('Could not get stats from the server');
+                        console.debug("Error fetching VHosts", error);
+                        $scope.showToast('Could not get virtual hosts from the server');
                     });
-            };
-
-            $scope.fetchStats();
 
 
-            /*$interval(() => {
+                $scope.fetchStats = () => {
+                    $http.get('api/v1/stats')
+                        .then((response) => {
+
+                            $scope.statusCodes = new Map();
+                            $scope.stats = response.data;
+
+                            for (const key in $scope.stats) {
+                                if (/[0-9]{3}$/.test(key)) {
+
+                                    const vParts = key.split(':');
+                                    const vKey = vParts[0];
+                                    const vCode = vParts[1];
+
+                                    if (!$scope.statusCodes.has(vKey)) {
+                                        $scope.statusCodes.set(vKey, []);
+                                    }
+
+                                    $scope.statusCodes.get(vKey).push(vCode + ':' + $scope.stats[key]);
+                                }
+                            }
+
+                            console.debug("stats response", response);
+                        })
+                        .catch((error) => {
+                            console.debug("Error fetching stats", error);
+                            $scope.showToast('Could not get stats from the server');
+                        });
+                };
+
                 $scope.fetchStats();
-            }, 12000);*/
 
-        }])
+
+                /*$interval(() => {
+                    $scope.fetchStats();
+                }, 12000);*/
+
+            }])
         .config(["$mdThemingProvider", "$httpProvider", function ($mdThemingProvider, $httpProvider) {
 
             $mdThemingProvider.theme('default').primaryPalette('amber');

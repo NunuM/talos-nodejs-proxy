@@ -8,8 +8,14 @@ import {MiddlewareRegistry} from "./middleware-registry";
 
 export class GatewayInMaintenanceMiddleware implements Middleware {
 
+    private readonly _statusCode: number;
+
+    constructor(statusCode: number = 503) {
+        this._statusCode = statusCode;
+    }
+
     onProxyRequest(proxyRequest: ServerRequest, proxyResponse: ServerResponse, next: () => void): void {
-        proxyResponse.endWithStatus(503);
+        proxyResponse.endWithStatus(this._statusCode);
     }
 
     preUpstreamRequest(upstream: UpstreamHost, options: ProxyRequestOptions, proxyResponse: ServerResponse, next: () => void): void {
@@ -25,6 +31,14 @@ export class GatewayInMaintenanceMiddleware implements Middleware {
     }
 
     serialize(): any {
-        return MiddlewareRegistry.GatewayInMaintenance;
+        return {type: MiddlewareRegistry.GatewayInMaintenance, args: {statusCode: this._statusCode}};
+    }
+
+    static args(): any {
+        return {statusCode: {type: 'number', default: 503, required: false}};
+    }
+
+    equals(other: any): boolean {
+        return !!(other && other instanceof GatewayInMaintenanceMiddleware);
     }
 }

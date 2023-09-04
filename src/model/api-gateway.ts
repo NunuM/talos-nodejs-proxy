@@ -5,7 +5,7 @@ import {LoadBalancerFactory, LoadBalancerType} from "../load_balancer/load-balan
 import {Identifiable} from "pluto-http-client/dist/framework/identifiable";
 import {TimeUnit} from "pluto-http-client";
 import {ServerRequest} from "./request";
-import {MiddlewareFactory} from "../middleware/middleware-registry";
+import {MiddlewareFactory, MiddlewareRegistry} from "../middleware/middleware-registry";
 import {Middleware} from "../middleware/middleware";
 
 export class ApiGateway extends Gateway implements Identifiable {
@@ -202,7 +202,9 @@ export class ApiGateway extends Gateway implements Identifiable {
             }
 
             // @ts-ignore
-            const middlewares = (obj.middlewares || []).map((m) => MiddlewareFactory[m](obj.domain));
+            const middlewares = (obj.middlewares || []).map((m) => {
+                return MiddlewareFactory.build(obj.domain, m);
+            });
 
             return new ApiGateway(
                 obj.domain,
@@ -241,6 +243,6 @@ export interface ApiGatewayObjectDefinition {
     name: string;
     loadBalancer: number,
     routesToUpstreamHosts: { [key: string]: Array<{ host: string; port: number, isAlive: boolean, isHTTPS: boolean, isHTTP2: boolean, isHTTP: boolean }> }
-    middlewares: number[];
+    middlewares: Array<{ type: MiddlewareRegistry, args: { [key: string]: any } }>;
     requestTimeout: number;
 }

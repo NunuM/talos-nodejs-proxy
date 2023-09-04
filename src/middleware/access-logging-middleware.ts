@@ -25,6 +25,10 @@ export class AccessLoggingMiddleware implements Middleware {
     }
 
     serialize(): any {
-        return MiddlewareRegistry.AccessLogging;
+        return {type: MiddlewareRegistry.AccessLogging, args: {}};
+    }
+
+    equals(other: any): boolean {
+        return !!(other && other instanceof AccessLoggingMiddleware);
     }
 }

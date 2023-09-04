@@ -32,7 +32,7 @@ export class ProxyService {
 
         for (let globalMiddleware of proxyConf.globalMiddlewares) {
             //@ts-ignore
-            this._middlewares.push(MiddlewareFactory[globalMiddleware]());
+            this._middlewares.push(MiddlewareFactory.build('proxy', globalMiddleware));
         }
 
         for (let server of proxyConf.servers) {

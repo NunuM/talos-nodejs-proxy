@@ -168,7 +168,16 @@ export class AdminApiService extends EventEmitter {
     }
 
     listMiddlewares(req: http.IncomingMessage, res: http.ServerResponse) {
-        this.reply(res, 200, MiddlewareList);
+
+        const middlewares = JSON.parse(JSON.stringify(MiddlewareList));
+
+        for (let middlewareListElement of middlewares) {
+            for (let globalMiddleware of Config.proxyConfigs().globalMiddlewares) {
+                middlewareListElement.global = globalMiddleware.type === middlewareListElement.id;
+            }
+        }
+
+        this.reply(res, 200, middlewares);
     }
 
     addVirtualHost(req: http.IncomingMessage, res: http.ServerResponse) {

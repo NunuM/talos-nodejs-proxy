@@ -12,8 +12,8 @@ export class GatewayStatsCollectorMiddlewareFactory implements Middleware {
 
     private readonly _domain: string;
 
-    constructor(domain: string) {
-        this._domain = domain;
+    constructor(args: { domain: string }) {
+        this._domain = args.domain;
     }
 
     build(service: GatewayHostService) {
@@ -37,7 +37,10 @@ export class GatewayStatsCollectorMiddlewareFactory implements Middleware {
     }
 
     serialize(): any {
-        return MiddlewareRegistry.GatewayStatsCollector;
+        return {type: MiddlewareRegistry.GatewayStatsCollector, args: {}};
     }
 
+    equals(other: any): boolean {
+        return !!(other && other instanceof GatewayStatsCollectorMiddleware);
+    }
 }

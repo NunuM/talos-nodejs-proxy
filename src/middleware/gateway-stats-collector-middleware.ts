@@ -37,7 +37,11 @@ export class GatewayStatsCollectorMiddleware implements Middleware {
     }
 
     serialize(): any {
-        return MiddlewareRegistry.GatewayStatsCollector;
+        return {type: MiddlewareRegistry.GatewayStatsCollector, args: {}};
+    }
+
+    equals(other: any): boolean {
+        return !!(other && other instanceof GatewayStatsCollectorMiddleware);
     }
 
 }

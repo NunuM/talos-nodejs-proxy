@@ -6,15 +6,16 @@ import {ProxyRequestOptions} from "../model/proxy-request-options";
 import {LOGGER} from "../service/logger-service";
 import {GatewayHostService} from "../service/gateway-host-service";
 import {GatewayStatsCollectorMiddlewareFactory} from "./factory/gateway-stats-collector-middleware-factory";
+import {List} from "pluto-http-client/dist/utils/collections";
 
 
 export class MiddlewareProcessor {
 
     private readonly _service: GatewayHostService;
-    private readonly _middlewares: Middleware[];
+    private readonly _middlewares: List<Middleware>;
 
     constructor(middlewares: Middleware[], service: GatewayHostService) {
-        this._middlewares = middlewares;
+        this._middlewares = new List<Middleware>(middlewares);
         this._service = service;
     }
 

@@ -4,10 +4,11 @@
   "private": true,
   "scripts": {
     "start": "node --require ts-node/register bin/echo-gate.ts",
-    "test": "npx jest --detectOpenHandles"
+    "test": "npx jest --detectOpenHandles",
+    "dist": "npx tsc; cp -r views dist; cp -r template dist"
   },
   "engines": {
-    "node": ">=10.0.0"
+    "node": ">=16.0.0"
   },
   "author": "Nunu",
   "license": "ISC",

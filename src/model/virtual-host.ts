@@ -6,7 +6,7 @@ import {Identifiable} from "pluto-http-client/dist/framework/identifiable";
 import {TimeUnit} from "pluto-http-client";
 import {ServerRequest} from "./request";
 import {Middleware} from "../middleware/middleware";
-import {MiddlewareFactory} from "../middleware/middleware-registry";
+import {MiddlewareFactory, MiddlewareRegistry} from "../middleware/middleware-registry";
 
 
 /**
@@ -137,7 +137,9 @@ export class VirtualHost extends Gateway implements Identifiable {
             });
 
             // @ts-ignore
-            const middlewares = (obj.middlewares || []).map((m) => MiddlewareFactory[m](domain));
+            const middlewares = (obj.middlewares || []).map((m) => {
+                return MiddlewareFactory.build(domain, m);
+            });
 
             // @ts-ignore
             return new VirtualHost(
@@ -202,6 +204,6 @@ export interface VirtualHostObjectDefinition {
     name: string;
     loadBalancer: number,
     upstreamHosts: Array<{ host: string; port: number, isAlive: boolean, isHTTPS: boolean, isHTTP2: boolean, isHTTP: boolean }>,
-    middlewares: number[];
+    middlewares: Array<{ type: MiddlewareRegistry, args: { [key: string]: any } }>;
     requestTimeout: number;
 }

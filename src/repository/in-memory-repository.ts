@@ -197,7 +197,11 @@ export class InMemoryRepository implements Repository {
      * @inheritDoc
      */
     private removeApiGateway(apiGateway: string): Promise<boolean> {
-        return Promise.resolve(this._apisGetaways.delete(apiGateway));
+        if (this._apisGetaways.delete(apiGateway)) {
+            return this.store();
+        }
+
+        return Promise.resolve(false);
     }
 
     /**

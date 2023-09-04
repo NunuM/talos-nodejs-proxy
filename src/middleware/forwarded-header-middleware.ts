@@ -4,8 +4,8 @@ import {ClientResponse, ServerResponse} from "../model/response";
 import {UpstreamHost} from "../model/upstream-host";
 import {ProxyRequestOptions} from "../model/proxy-request-options";
 import util from "util";
-import {MiddlewareRegistry} from "./middleware-registry";
 import {Config} from "../app/config";
+import {MiddlewareRegistry} from "./middleware-registry";
 
 
 export class ForwardedHeaderMiddleware implements Middleware {
@@ -30,7 +30,10 @@ export class ForwardedHeaderMiddleware implements Middleware {
     }
 
     serialize(): any {
-        return MiddlewareRegistry.ForwardHeaders;
+        return {type: MiddlewareRegistry.ForwardHeaders, args: {}};
     }
 
+    equals(other: any): boolean {
+        return !!(other && other instanceof ForwardedHeaderMiddleware);
+    }
 }

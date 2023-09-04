@@ -64,6 +64,10 @@ export class EncodingMiddleware implements Middleware {
     }
 
     serialize(): any {
-        return MiddlewareRegistry.ContentEncoding;
+        return {type: MiddlewareRegistry.ContentEncoding, args: {}};
+    }
+
+    equals(other: any): boolean {
+        return !!(other && other instanceof EncodingMiddleware);
     }
 }

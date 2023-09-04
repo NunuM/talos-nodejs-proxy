@@ -1,20 +1,23 @@
 import {Middleware} from "./middleware";
-import {UpstreamHost} from "../model/upstream-host";
 import {ServerRequest} from "../model/request";
 import {ClientResponse, ProxyResponse, ServerResponse} from "../model/response";
+import {UpstreamHost} from "../model/upstream-host";
 import {ProxyRequestOptions} from "../model/proxy-request-options";
+import {HttpHeaders} from "pluto-http-client";
 import {MiddlewareRegistry} from "./middleware-registry";
 
-import {v4 as uuid} from 'uuid';
+export class RedirectMiddleware implements Middleware {
 
-export class CorrelationIdMiddleware implements Middleware {
+    private readonly _location: string;
+
+    constructor(args: { location: string }) {
+        this._location = args.location;
+    }
 
     onProxyRequest(proxyRequest: ServerRequest, proxyResponse: ServerResponse, next: () => void): void {
-        if (!proxyRequest.correlationId) {
-            proxyRequest.correlationId = uuid();
-        }
-
-        next();
+        proxyResponse
+            .setHeader(HttpHeaders.LOCATION, this._location);
+        proxyResponse.endWithStatus(303);
     }
 
     onProxyResponse(proxyResponse: ProxyResponse, next: () => void): void {
@@ -30,11 +33,15 @@ export class CorrelationIdMiddleware implements Middleware {
     }
 
     serialize(): any {
-        return {type: MiddlewareRegistry.CorrelationId, args: {}};
+        return {type: MiddlewareRegistry.Redirect, args: {location: this._location}};
+    }
+
+    static args(): any {
+        return {location: {type: 'string', required: true}}
     }
 
     equals(other: any): boolean {
-        return !!(other && other instanceof CorrelationIdMiddleware);
+        return !!(other && other instanceof RedirectMiddleware);
     }
 
 }

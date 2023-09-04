@@ -4,32 +4,54 @@ import {ForwardedHeaderMiddleware} from "./forwarded-header-middleware";
 import {GatewayInMaintenanceMiddleware} from "./gateway-in-maintenance-middleware";
 import {CorrelationIdMiddleware} from "./correlation-id-middleware";
 import {GatewayStatsCollectorMiddlewareFactory} from "./factory/gateway-stats-collector-middleware-factory";
+import {Middleware} from "./middleware";
+import {RedirectMiddleware} from "./redirect-middleware";
 
 export enum MiddlewareRegistry {
-    AccessLogging,
-    ContentEncoding,
-    ForwardHeaders,
-    GatewayInMaintenance,
-    GatewayStatsCollector,
-    CorrelationId
+    AccessLogging = 'AccessLoggingMiddleware',
+    ContentEncoding = 'EncodingMiddleware',
+    ForwardHeaders = 'ForwardedHeaderMiddleware',
+    GatewayInMaintenance = 'GatewayInMaintenanceMiddleware',
+    GatewayStatsCollector = 'GatewayStatsCollectorMiddleware',
+    CorrelationId = 'CorrelationIdMiddleware',
+    Redirect = 'RedirectMiddleware'
 }
 
-export const MiddlewareFactory = {
-    [MiddlewareRegistry.AccessLogging]: () => new AccessLoggingMiddleware(),
-    [MiddlewareRegistry.ContentEncoding]: () => new EncodingMiddleware(),
-    [MiddlewareRegistry.ForwardHeaders]: () => new ForwardedHeaderMiddleware(),
-    [MiddlewareRegistry.GatewayInMaintenance]: () => new GatewayInMaintenanceMiddleware(),
-    [MiddlewareRegistry.GatewayStatsCollector]: (domain: string) => {
-        return new GatewayStatsCollectorMiddlewareFactory(domain);
-    },
-    [MiddlewareRegistry.CorrelationId]: () => new CorrelationIdMiddleware(),
+export class MiddlewareFactory {
+
+    static build(domain: string, deserialized: { type: MiddlewareRegistry, args: { [key: string]: any } }): Middleware {
+        switch (deserialized.type) {
+            case MiddlewareRegistry.AccessLogging:
+                return new AccessLoggingMiddleware();
+            case MiddlewareRegistry.ContentEncoding:
+                return new EncodingMiddleware();
+            case MiddlewareRegistry.ForwardHeaders:
+                return new ForwardedHeaderMiddleware();
+            case MiddlewareRegistry.GatewayInMaintenance:
+                return new GatewayInMaintenanceMiddleware(deserialized.args.statusCode);
+            case MiddlewareRegistry.GatewayStatsCollector:
+                //@ts-ignore
+                return new GatewayStatsCollectorMiddlewareFactory(deserialized.args);
+            case MiddlewareRegistry.CorrelationId:
+                return new CorrelationIdMiddleware();
+            case MiddlewareRegistry.Redirect:
+                //@ts-ignore
+                return new RedirectMiddleware(deserialized.args);
+        }
+    }
 }
 
 export const MiddlewareList = [
-    {id: MiddlewareRegistry.AccessLogging, name: 'AccessLoggingMiddleware'},
-    {id: MiddlewareRegistry.ContentEncoding, name: 'EncodingMiddleware'},
-    {id: MiddlewareRegistry.ForwardHeaders, name: 'ForwardedHeaderMiddleware'},
-    {id: MiddlewareRegistry.GatewayInMaintenance, name: 'GatewayInMaintenanceMiddleware'},
-    {id: MiddlewareRegistry.CorrelationId, name: 'CorrelationIdMiddleware'},
-    {id: MiddlewareRegistry.GatewayStatsCollector, name: 'GatewayStatsCollectorMiddleware'},
+    {id: MiddlewareRegistry.AccessLogging, name: 'AccessLoggingMiddleware', args: {}},
+    {id: MiddlewareRegistry.ContentEncoding, name: 'EncodingMiddleware', args: {}},
+    {id: MiddlewareRegistry.ForwardHeaders, name: 'ForwardedHeaderMiddleware', args: {}},
+    {
+        id: MiddlewareRegistry.GatewayInMaintenance,
+        name: 'GatewayInMaintenanceMiddleware',
+        args: GatewayInMaintenanceMiddleware.args()
+    },
+    {id: MiddlewareRegistry.CorrelationId, name: 'CorrelationIdMiddleware', args: {}},
+    {id: MiddlewareRegistry.GatewayStatsCollector, name: 'GatewayStatsCollectorMiddleware', args: {}},
+    {id: MiddlewareRegistry.Redirect, name: 'RedirectMiddleware', args: RedirectMiddleware.args()},
+
 ]

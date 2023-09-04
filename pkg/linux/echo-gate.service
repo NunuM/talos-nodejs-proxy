@@ -1,0 +1,19 @@
+[Unit]
+Description=echogated
+After=network.target
+Wants=network-online.target
+
+[Service]
+Restart=always
+Type=simple
+ExecStart=node bin/echo-gate.js
+Environment='NODE_ENV=production'
+
+User=daemon
+Group=daemon
+
+[Install]
+WantedBy=multi-user.target
+
+
+
