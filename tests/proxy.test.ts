@@ -289,8 +289,8 @@ describe('Proxy test', () => {
         const proxyService = new ProxyService(gatewayHostService);
 
         proxyService.httpsProxy(9999, {
-            key: fs.readFileSync(path.join(__dirname, 'ssl', 'localhost-privkey.pem')),
-            cert: fs.readFileSync(path.join(__dirname, 'ssl', 'localhost-cert.pem'))
+            key: path.join(__dirname, 'ssl', 'localhost-privkey.pem'),
+            cert: path.join(__dirname, 'ssl', 'localhost-cert.pem')
         });
 
         proxyService.serve();
@@ -361,8 +361,8 @@ describe('Proxy test', () => {
         const proxyService = new ProxyService(gatewayHostService);
 
         proxyService.httpsProxy(9999, {
-            key: fs.readFileSync(path.join(__dirname, 'ssl', 'localhost-privkey.pem')),
-            cert: fs.readFileSync(path.join(__dirname, 'ssl', 'localhost-cert.pem'))
+            key: path.join(__dirname, 'ssl', 'localhost-privkey.pem'),
+            cert: path.join(__dirname, 'ssl', 'localhost-cert.pem')
         });
 
         proxyService.serve();
@@ -433,8 +433,8 @@ describe('Proxy test', () => {
         const proxyService = new ProxyService(gatewayHostService);
 
         proxyService.httpsProxy(9999, {
-            key: fs.readFileSync(path.join(__dirname, 'ssl', 'localhost-privkey.pem')),
-            cert: fs.readFileSync(path.join(__dirname, 'ssl', 'localhost-cert.pem'))
+            key: path.join(__dirname, 'ssl', 'localhost-privkey.pem'),
+            cert: path.join(__dirname, 'ssl', 'localhost-cert.pem')
         });
 
         proxyService.serve();
@@ -505,8 +505,8 @@ describe('Proxy test', () => {
         const proxyService = new ProxyService(gatewayHostService);
 
         proxyService.http2Proxy(9999, {
-            key: fs.readFileSync(path.join(__dirname, 'ssl', 'localhost-privkey.pem')),
-            cert: fs.readFileSync(path.join(__dirname, 'ssl', 'localhost-cert.pem'))
+            key: path.join(__dirname, 'ssl', 'localhost-privkey.pem'),
+            cert: path.join(__dirname, 'ssl', 'localhost-cert.pem')
         });
 
         proxyService.serve();
@@ -575,8 +575,8 @@ describe('Proxy test', () => {
         const proxyService = new ProxyService(gatewayHostService);
 
         proxyService.http2Proxy(9999, {
-            key: fs.readFileSync(path.join(__dirname, 'ssl', 'localhost-privkey.pem')),
-            cert: fs.readFileSync(path.join(__dirname, 'ssl', 'localhost-cert.pem'))
+            key: path.join(__dirname, 'ssl', 'localhost-privkey.pem'),
+            cert: path.join(__dirname, 'ssl', 'localhost-cert.pem')
         });
 
         proxyService.serve();
@@ -645,8 +645,8 @@ describe('Proxy test', () => {
         const proxyService = new ProxyService(gatewayHostService);
 
         proxyService.http2Proxy(9999, {
-            key: fs.readFileSync(path.join(__dirname, 'ssl', 'localhost-privkey.pem')),
-            cert: fs.readFileSync(path.join(__dirname, 'ssl', 'localhost-cert.pem'))
+            key: path.join(__dirname, 'ssl', 'localhost-privkey.pem'),
+            cert: path.join(__dirname, 'ssl', 'localhost-cert.pem')
         });
 
         proxyService.serve();
