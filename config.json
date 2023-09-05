@@ -37,6 +37,16 @@
     "type": "file",
     "filePath": "gateways.json"
   },
+  "alarmist": {
+    "smtpServer": "smtp.nunum.me",
+    "smtpPort": 25,
+    "senderEmail": "proxy@talos.sh",
+    "subject": "EchoGate Proxy Error",
+    "recipients": [
+      "nuno@nunum.me"
+    ],
+    "errorEmailTemplateFile": "template/email.html"
+  },
   "logging": {
     "accessLog": {
       "level": "info",

@@ -1,30 +1,3 @@
-import {RedisRepository} from "./repository/redis-repository";
-import {GatewayStatsCollectorMiddlewareFactory} from "./middleware/factory/gateway-stats-collector-middleware-factory";
-
-const oldRedisRepository = new RedisRepository('redis://192.168.1.154:6379/0');
-
-const newRedisRepository = new RedisRepository('redis://192.168.1.199:6379/0');
-
-
-newRedisRepository
-    .connect()
-    .then(() => {
-        return newRedisRepository.loadApiGateways();
-    })
-    .then(async (hosts) => {
-
-        for (let host of hosts) {
-
-            host.middlewares.splice(0 , 1);
-
-            host.middlewares.push(new GatewayStatsCollectorMiddlewareFactory({domain:host.domain}));
-
-            await newRedisRepository.saveApiGateway(host);
-        }
-    })
-    .catch(console.error);
-
-
 // import {UpstreamHost} from "./model/upstream-host";
 // import {VirtualHost} from "./model/virtual-host";
 // import {LoadBalancerType} from "./load_balancer/load-balancer-type";
