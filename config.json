@@ -1,6 +1,6 @@
 {
   "appId": "d0e06949-fd64-437a-9bfe-ce3cf2d7b63d",
-  "numberOfWorkers": 2,
+  "numberOfWorkers": 0,
   "proxy": {
     "globalMiddlewares": [
       {
@@ -30,14 +30,12 @@
     "port": 7777,
     "bindOnlyLocalhost": true,
     "authenticator": {
-      "type": "basic",
-      "username": "nuno",
-      "password": "test"
+      "type": "none"
     }
   },
   "repository": {
-    "type": "redis",
-    "redisConnectionString": "redis://192.168.1.199:6379/0"
+    "type": "file",
+    "filePath": "gateways.json"
   },
   "alarmist": {
     "smtpServer": "smtp.nunum.me",

@@ -54,7 +54,7 @@ if (alarmistic) {
         },
         recipients: alarmistic.recipients.join(','),
         subject: alarmistic.subject,
-        sender: alarmistic.smtpServer,
+        sender: alarmistic.senderEmail,
         layout: {type: 'email'},
         html: true
     };

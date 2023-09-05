@@ -6,21 +6,20 @@ const oldRedisRepository = new RedisRepository('redis://192.168.1.154:6379/0');
 const newRedisRepository = new RedisRepository('redis://192.168.1.199:6379/0');
 
 
-oldRedisRepository
+newRedisRepository
     .connect()
-    .then(() => newRedisRepository.connect())
     .then(() => {
-        return oldRedisRepository.loadVirtualHosts();
+        return newRedisRepository.loadApiGateways();
     })
-    .then(async (hostts) => {
+    .then(async (hosts) => {
 
-        for (let hostt of hostts) {
-            for (let upstreamHost of hostt.upstreamHosts) {
-                upstreamHost.isHTTP = true;
-            }
-            hostt.middlewares.push(new GatewayStatsCollectorMiddlewareFactory(hostt.domain));
+        for (let host of hosts) {
 
-            await newRedisRepository.saveVirtualHost(hostt);
+            host.middlewares.splice(0 , 1);
+
+            host.middlewares.push(new GatewayStatsCollectorMiddlewareFactory({domain:host.domain}));
+
+            await newRedisRepository.saveApiGateway(host);
         }
     })
     .catch(console.error);

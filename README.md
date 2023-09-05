@@ -70,7 +70,12 @@ The reverse proxy is highly configurable using a JSON configuration file that fo
   "appId": "your-app-id",
   "numberOfWorkers": 0,
   "proxy": {
-    "globalMiddlewares": [],
+    "globalMiddlewares": [
+      {
+        "type": "AccessLoggingMiddleware",
+        "args": {}
+      }
+    ],
     "servers": [
       {
         "port": 8888,
