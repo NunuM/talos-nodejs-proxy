@@ -13,7 +13,7 @@ export function protocolFrom(request: http2.Http2ServerRequest) {
         return Protocol.Http2;
     }
 
-    return Protocol.Https;
+    return Protocol.Http;
 }
 
 export class HeadersConverter {

@@ -28,7 +28,8 @@ export class Http2Proxy implements Proxy {
             //@ts-ignore
             key: fs.readFileSync(this._options.key),
             //@ts-ignore
-            cert: fs.readFileSync(this._options.cert)
+            cert: fs.readFileSync(this._options.cert),
+            settings: {enablePush: false}
         });
 
         if (this._options.allowHTTP1) {

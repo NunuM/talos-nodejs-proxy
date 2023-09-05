@@ -88,7 +88,13 @@ export class Http1Request implements ServerRequest {
                 },
                 client: {
                     rejectUnauthorized: false,
-                    timeout: gateway.requestTimeout
+                    timeout: gateway.requestTimeout,
+                    settings: {
+                        enablePush: false
+                    }
+                },
+                options: {
+                    signal: abortController.signal,
                 },
                 signal: abortController.signal
             } as Http2ProxyRequestOptions;
@@ -190,7 +196,13 @@ export class Http2CompatibleModeRequest implements ServerRequest {
                     headers: copy,
                     client: {
                         rejectUnauthorized: false,
-                        timeout: gateway.requestTimeout
+                        timeout: gateway.requestTimeout,
+                        settings: {
+                            enablePush: false
+                        }
+                    },
+                    options: {
+                        signal: abortController.signal
                     },
                     signal: abortController.signal
                 } as Http2ProxyRequestOptions;
@@ -203,7 +215,13 @@ export class Http2CompatibleModeRequest implements ServerRequest {
                     },
                     client: {
                         rejectUnauthorized: false,
-                        timeout: gateway.requestTimeout
+                        timeout: gateway.requestTimeout,
+                        settings: {
+                            enablePush: true
+                        }
+                    },
+                    options: {
+                        signal: abortController.signal
                     },
                     signal: abortController.signal
                 } as Http2ProxyRequestOptions;
@@ -298,7 +316,13 @@ export class Http2Request implements ServerRequest {
                 headers: this._headers2,
                 client: {
                     rejectUnauthorized: false,
-                    timeout: gateway.requestTimeout
+                    timeout: gateway.requestTimeout,
+                    settings: {
+                        enablePush: false,
+                    }
+                },
+                options: {
+                    signal: abortController.signal
                 },
                 signal: abortController.signal
             } as Http2ProxyRequestOptions;

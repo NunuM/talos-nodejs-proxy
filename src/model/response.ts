@@ -42,9 +42,7 @@ class ProxyResponseImpl implements ServerResponse, ProxyResponse {
         this._sink.endWithStatus(status, onEnd);
     }
 
-    finally(status: number, headers: any, stream: Readable): void {
-        this._sink.endWithStatus(status,)
-    }
+    finally(status: number, headers: any, stream: Readable): void {}
 
     getTransport(): any {
         return this._sink.getTransport();
@@ -340,7 +338,10 @@ export class Http2ClientResponse implements ClientResponse {
 
         } else {
             return new ProxyResponseImpl(
-                new NormalizedResponse(this.status, this.headers, this._response),
+                new NormalizedResponse(
+                    this.status,
+                    this.headers,
+                    this._response),
                 serverResponse
             );
         }

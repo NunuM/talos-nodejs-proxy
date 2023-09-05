@@ -85,13 +85,13 @@ log4js.configure({
             }
         },
         email: emailLogConfig,
-        'just-errors': {type: 'logLevelFilter', appender: 'email', level: 'error'}
+        'just-errors': {type: 'logLevelFilter', appender: 'email', level: alarmistic ? 'error' : 'off'}
     },
     categories: {
-        proxy: {appenders: ['console'], level: logging.proxy.level},
-        accessLog: {appenders: ['file'], level: logging.accessLog.level},
-        admin: {appenders: ['console'], level: logging.admin.level},
-        worker: {appenders: ['worker'], level: logging.worker.level},
+        proxy: {appenders: ['console', 'just-errors'], level: logging.proxy.level},
+        accessLog: {appenders: ['file', 'just-errors'], level: logging.accessLog.level},
+        admin: {appenders: ['console', 'just-errors'], level: logging.admin.level},
+        worker: {appenders: ['worker', 'just-errors'], level: logging.worker.level},
         default: {appenders: ['console', 'just-errors'], level: logging.proxy.level}
     }
 });

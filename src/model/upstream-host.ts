@@ -155,7 +155,7 @@ export class UpstreamHost {
 
     getOrCreateConnection(client: ClientSessionOptions | SecureClientSessionOptions): Promise<http2.ClientHttp2Session> {
         return new Promise<http2.ClientHttp2Session>((resolve, reject) => {
-            if (this.isHTTP2 && !this._connection) {
+            if (this.isHTTP2 && (!this._connection || this._connection.destroyed)) {
                 this._connection = http2.connect(
                     new URL(util.format("https://%s:%d", this._host, this._port)), client,
                     (session) => {
