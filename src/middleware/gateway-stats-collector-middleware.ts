@@ -44,4 +44,8 @@ export class GatewayStatsCollectorMiddleware implements Middleware {
         return !!(other && other instanceof GatewayStatsCollectorMiddleware);
     }
 
+    toString() {
+        return MiddlewareRegistry.GatewayStatsCollector;
+    }
+
 }

@@ -43,4 +43,8 @@ export class GatewayStatsCollectorMiddlewareFactory implements Middleware {
     equals(other: any): boolean {
         return !!(other && other instanceof GatewayStatsCollectorMiddleware);
     }
+
+    toString() {
+        return MiddlewareRegistry.GatewayStatsCollector;
+    }
 }

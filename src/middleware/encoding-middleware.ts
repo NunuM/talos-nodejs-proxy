@@ -37,6 +37,7 @@ export class EncodingMiddleware implements Middleware {
             proxyResponse.setHeader('content-encoding', "gzip");
 
             this._transformer = zlib.createGzip();
+            this._transformer.setMaxListeners(11);
 
         } else if (this._accepts?.includes('br')) {
 
@@ -69,5 +70,9 @@ export class EncodingMiddleware implements Middleware {
 
     equals(other: any): boolean {
         return !!(other && other instanceof EncodingMiddleware);
+    }
+
+    toString() {
+        return MiddlewareRegistry.ContentEncoding;
     }
 }

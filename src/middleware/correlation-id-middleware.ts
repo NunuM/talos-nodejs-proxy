@@ -37,4 +37,8 @@ export class CorrelationIdMiddleware implements Middleware {
         return !!(other && other instanceof CorrelationIdMiddleware);
     }
 
+    toString() {
+        return MiddlewareRegistry.CorrelationId;
+    }
+
 }

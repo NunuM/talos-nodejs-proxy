@@ -31,4 +31,8 @@ export class AccessLoggingMiddleware implements Middleware {
     equals(other: any): boolean {
         return !!(other && other instanceof AccessLoggingMiddleware);
     }
+
+    toString() {
+        return MiddlewareRegistry.AccessLogging;
+    }
 }

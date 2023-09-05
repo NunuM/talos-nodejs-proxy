@@ -36,4 +36,8 @@ export class ForwardedHeaderMiddleware implements Middleware {
     equals(other: any): boolean {
         return !!(other && other instanceof ForwardedHeaderMiddleware);
     }
+
+    toString() {
+        return MiddlewareRegistry.ForwardHeaders;
+    }
 }

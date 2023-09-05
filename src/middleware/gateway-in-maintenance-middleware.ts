@@ -41,4 +41,8 @@ export class GatewayInMaintenanceMiddleware implements Middleware {
     equals(other: any): boolean {
         return !!(other && other instanceof GatewayInMaintenanceMiddleware);
     }
+
+    toString() {
+        return MiddlewareRegistry.GatewayInMaintenance;
+    }
 }

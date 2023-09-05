@@ -44,4 +44,8 @@ export class RedirectMiddleware implements Middleware {
         return !!(other && other instanceof RedirectMiddleware);
     }
 
+    toString() {
+        return MiddlewareRegistry.Redirect;
+    }
+
 }
