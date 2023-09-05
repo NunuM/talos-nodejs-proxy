@@ -135,7 +135,7 @@ export class Http2CompatibleModeRequest implements ServerRequest {
 
     get acceptEncoding(): string {
         //@ts-ignore
-        return this._request['accept-encoding'] || '';
+        return this._request.headers['accept-encoding'] || '';
     }
 
     get contentEncoding(): string | undefined {
