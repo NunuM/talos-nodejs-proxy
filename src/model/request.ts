@@ -76,7 +76,7 @@ export class Http1Request implements ServerRequest {
 
         const copy = JSON.parse(JSON.stringify(this._request.headers));
 
-        copy.host = upstream.host;
+        copy.host = gateway.domain;
 
         if (upstream.isHTTP2) {
 
@@ -182,7 +182,7 @@ export class Http2CompatibleModeRequest implements ServerRequest {
 
         const copy = JSON.parse(JSON.stringify(this._request.headers));
 
-        copy.host = upstream.host;
+        copy.host = gateway.domain;
 
         if (upstream.isHTTP2) {
             if (this._request.httpVersion == '2.0') {
@@ -289,7 +289,7 @@ export class Http2Request implements ServerRequest {
 
         const abortController = new AbortController();
 
-        this._stream.setTimeout(gateway.requestTimeout,() => {
+        this._stream.setTimeout(gateway.requestTimeout, () => {
             abortController.abort("Socket timeout");
         });
 
@@ -306,7 +306,7 @@ export class Http2Request implements ServerRequest {
 
         const http1Headers = HeadersConverter.convertHttp2ToHttp(this._headers2);
 
-        http1Headers.host = upstream.host;
+        http1Headers.host = gateway.domain;
 
         return {
             hostname: upstream.host,

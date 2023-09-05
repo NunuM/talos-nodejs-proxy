@@ -1,15 +1,27 @@
 {
-  "appId": "string",
+  "appId": "d0e06949-fd64-437a-9bfe-ce3cf2d7b63d",
   "numberOfWorkers": 0,
   "proxy": {
     "globalMiddlewares": [
-      0
+      {
+        "type": "AccessLoggingMiddleware",
+        "args": {}
+      }
     ],
     "servers": [
       {
-        "port": 8080,
+        "port": 7080,
         "protocol": "http",
         "options": {}
+      },
+      {
+        "port": 7081,
+        "protocol": "http2",
+        "options": {
+          "key": "ssl/key3.pem",
+          "cert": "ssl/cert3.pem",
+          "allowHTTP1": true
+        }
       }
     ],
     "gateways": []
@@ -25,7 +37,18 @@
   },
   "repository": {
     "type": "file",
-    "filePath": "gateways.json"
+    "filePath": "gateways.json",
+    "redisConnectionString": "redis://192.168.1.199:6379/0"
+  },
+  "alarmist": {
+    "smtpServer": "smtp.nunum.me",
+    "smtpPort": 25,
+    "senderEmail": "proxy@talos.sh",
+    "subject": "EchoGate Proxy Error",
+    "recipients": [
+      "nuno@nunum.me"
+    ],
+    "errorEmailTemplateFile": "template/email.html"
   },
   "logging": {
     "accessLog": {
