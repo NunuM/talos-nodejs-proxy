@@ -136,14 +136,16 @@ export class ProxyService {
             .resolveGateway(clientHeader)
             .then((gateway) => gateway.request(processor, proxyRequest, proxyResponse))
             .catch((error) => {
-                LOGGER.error("Error proxying request", clientHeader, error);
+
                 if (error instanceof ProxyError) {
+                    LOGGER.warn("Proxy error", clientHeader, error);
                     const response = error.toResponse();
 
                     proxyResponse.endWithStatus(response.status);
 
                 } else {
-                    proxyResponse.endWithStatus(200);
+                    LOGGER.error("Unexpected error while proxying request", clientHeader, error);
+                    proxyResponse.endWithStatus(500);
                 }
             });
     }

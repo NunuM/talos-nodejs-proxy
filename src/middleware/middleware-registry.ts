@@ -31,7 +31,7 @@ export class MiddlewareFactory {
                 return new GatewayInMaintenanceMiddleware(deserialized.args.statusCode);
             case MiddlewareRegistry.GatewayStatsCollector:
                 //@ts-ignore
-                return new GatewayStatsCollectorMiddlewareFactory(deserialized.args);
+                return new GatewayStatsCollectorMiddlewareFactory(Object.assign(deserialized.args, {domain}));
             case MiddlewareRegistry.CorrelationId:
                 return new CorrelationIdMiddleware();
             case MiddlewareRegistry.Redirect:

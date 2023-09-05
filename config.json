@@ -1,6 +1,6 @@
 {
   "appId": "d0e06949-fd64-437a-9bfe-ce3cf2d7b63d",
-  "numberOfWorkers": 0,
+  "numberOfWorkers": 2,
   "proxy": {
     "globalMiddlewares": [
       {
@@ -36,8 +36,7 @@
     }
   },
   "repository": {
-    "type": "file",
-    "filePath": "gateways.json",
+    "type": "redis",
     "redisConnectionString": "redis://192.168.1.199:6379/0"
   },
   "alarmist": {
@@ -57,7 +56,7 @@
       "logDirectory": "./"
     },
     "proxy": {
-      "level": "info"
+      "level": "debug"
     },
     "admin": {
       "level": "info"

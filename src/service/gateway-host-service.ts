@@ -7,6 +7,7 @@ import {EventEmitter} from 'events';
 
 /** project imports */
 import {ResponseStats} from '../model/response-stats';
+import {LOGGER} from "./logger-service";
 
 /**
  * @class
@@ -50,6 +51,8 @@ export class GatewayHostService extends EventEmitter {
      */
     addGatewayHost(gateway: Gateway) {
 
+        LOGGER.debug("adding gateway:", gateway.domain);
+
         if (gateway.isRegexBased) {
 
             const hasVHost = this._regexBasedHosts.find((v) => v.domain === gateway.domain);
@@ -76,6 +79,10 @@ export class GatewayHostService extends EventEmitter {
         let idx;
         if (hostHeaderValue.length === 0) {
             throw new GatewayNotFoundError(`Gateway not found for empty domain:${hostHeaderValue}`);
+        }
+
+        if(hostHeaderValue.startsWith('www.')) {
+            hostHeaderValue = hostHeaderValue.substring(4);
         }
 
         if ((idx = hostHeaderValue.indexOf(":")) !== -1) {
