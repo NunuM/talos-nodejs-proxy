@@ -25,9 +25,9 @@ export class MiddlewareFactory {
             case MiddlewareRegistry.AccessLogging:
                 return new AccessLoggingMiddleware();
             case MiddlewareRegistry.ContentEncoding:
-                return new EncodingMiddleware();
-            case MiddlewareRegistry.ForwardHeaders:
                 return new EncodingMiddlewareFactory();
+            case MiddlewareRegistry.ForwardHeaders:
+                return new ForwardedHeaderMiddleware();
             case MiddlewareRegistry.GatewayInMaintenance:
                 return new GatewayInMaintenanceMiddleware(deserialized.args.statusCode);
             case MiddlewareRegistry.GatewayStatsCollector:

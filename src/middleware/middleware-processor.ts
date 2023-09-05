@@ -15,21 +15,23 @@ export class MiddlewareProcessor {
     private readonly _middlewares: List<Middleware>;
 
     constructor(middlewares: Middleware[], service: GatewayHostService) {
-        this._middlewares = new List<Middleware>(middlewares);
+        this._middlewares = new List<Middleware>();
         this._service = service;
+        this.append(middlewares);
     }
 
     get size(): number {
         return this._middlewares.length;
     }
 
-    append(middleware: Middleware[]): void {
-        this._middlewares.push(...middleware.map((m) => {
-            if (m instanceof MiddlewareAbstractFactory) {
-                return m.build(this._service);
+    append(middlewares: Middleware[]): void {
+        middlewares.forEach((middleware) => {
+            if (middleware instanceof MiddlewareAbstractFactory) {
+                this._middlewares.push(middleware.build(this._service));
+            } else {
+                this._middlewares.push(middleware);
             }
-            return m;
-        }));
+        });
     }
 
     pre(clientHeader: string, request: ServerRequest, response: ServerResponse, nextStage: () => void, idx = 0) {
