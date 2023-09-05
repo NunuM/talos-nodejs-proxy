@@ -6,6 +6,7 @@ import {CorrelationIdMiddleware} from "./correlation-id-middleware";
 import {GatewayStatsCollectorMiddlewareFactory} from "./factory/gateway-stats-collector-middleware-factory";
 import {Middleware} from "./middleware";
 import {RedirectMiddleware} from "./redirect-middleware";
+import {EncodingMiddlewareFactory} from "./factory/encoding-middleware-factory";
 
 export enum MiddlewareRegistry {
     AccessLogging = 'AccessLoggingMiddleware',
@@ -26,7 +27,7 @@ export class MiddlewareFactory {
             case MiddlewareRegistry.ContentEncoding:
                 return new EncodingMiddleware();
             case MiddlewareRegistry.ForwardHeaders:
-                return new ForwardedHeaderMiddleware();
+                return new EncodingMiddlewareFactory();
             case MiddlewareRegistry.GatewayInMaintenance:
                 return new GatewayInMaintenanceMiddleware(deserialized.args.statusCode);
             case MiddlewareRegistry.GatewayStatsCollector:

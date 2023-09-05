@@ -1,39 +1,20 @@
 import {Middleware} from "../middleware";
-import {ServerRequest} from "../../model/request";
-import {ClientResponse, ProxyResponse, ServerResponse} from "../../model/response";
-import {UpstreamHost} from "../../model/upstream-host";
-import {ProxyRequestOptions} from "../../model/proxy-request-options";
 import {GatewayHostService} from "../../service/gateway-host-service";
 import {GatewayStatsCollectorMiddleware} from "../gateway-stats-collector-middleware";
 import {MiddlewareRegistry} from "../middleware-registry";
+import {MiddlewareAbstractFactory} from "./middleware-abstract-factory";
 
-
-export class GatewayStatsCollectorMiddlewareFactory implements Middleware {
+export class GatewayStatsCollectorMiddlewareFactory extends MiddlewareAbstractFactory implements Middleware {
 
     private readonly _domain: string;
 
     constructor(args: { domain: string }) {
+        super();
         this._domain = args.domain;
     }
 
     build(service: GatewayHostService) {
         return new GatewayStatsCollectorMiddleware(this._domain, service);
-    }
-
-    onProxyRequest(proxyRequest: ServerRequest, proxyResponse: ServerResponse, next: () => void): void {
-        next()
-    }
-
-    onProxyResponse(proxyResponse: ProxyResponse, next: () => void): void {
-        next()
-    }
-
-    postUpstreamResponse(upstreamRequest: ClientResponse, proxyResponse: ServerResponse, next: () => void): void {
-        next()
-    }
-
-    preUpstreamRequest(upstream: UpstreamHost, options: ProxyRequestOptions, proxyResponse: ServerResponse, next: () => void): void {
-        next()
     }
 
     serialize(): any {

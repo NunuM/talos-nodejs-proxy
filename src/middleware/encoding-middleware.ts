@@ -44,6 +44,7 @@ export class EncodingMiddleware implements Middleware {
             proxyResponse.setHeader('content-encoding', "br");
 
             this._transformer = zlib.createBrotliCompress();
+
         } else if (this._accepts?.includes('deflate')) {
 
             proxyResponse.setHeader('content-encoding', "deflate");

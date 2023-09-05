@@ -5,8 +5,8 @@ import {ClientResponse, ProxyResponse, ServerResponse} from "../model/response";
 import {ProxyRequestOptions} from "../model/proxy-request-options";
 import {LOGGER} from "../service/logger-service";
 import {GatewayHostService} from "../service/gateway-host-service";
-import {GatewayStatsCollectorMiddlewareFactory} from "./factory/gateway-stats-collector-middleware-factory";
 import {List} from "pluto-http-client/dist/utils/collections";
+import {MiddlewareAbstractFactory} from "./factory/middleware-abstract-factory";
 
 
 export class MiddlewareProcessor {
@@ -25,7 +25,7 @@ export class MiddlewareProcessor {
 
     append(middleware: Middleware[]): void {
         this._middlewares.push(...middleware.map((m) => {
-            if (m instanceof GatewayStatsCollectorMiddlewareFactory) {
+            if (m instanceof MiddlewareAbstractFactory) {
                 return m.build(this._service);
             }
             return m;
