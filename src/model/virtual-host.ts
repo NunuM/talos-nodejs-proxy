@@ -208,7 +208,7 @@ export class VirtualHost extends Gateway implements Identifiable {
             }))
             .build();
 
-        const response = await client.target(`http://localhost:${Config.administration().port}`)
+        const response = await client.target(`http://127.0.0.1:${Config.administration().port}`)
             .path("/api/v1/virtualhost")
             .request()
             .post(new JsonEntity(this.toJSON()));

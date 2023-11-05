@@ -244,7 +244,7 @@ export class ApiGateway extends Gateway implements Identifiable {
             .withTimeout(1, TimeUnit.Minutes)
             .build();
 
-        const response = await client.target(`http://localhost:${Config.administration().port}`)
+        const response = await client.target(`http://127.0.0.1:${Config.administration().port}`)
             .path("/api/v1/api-gateway")
             .request()
             .post(new JsonEntity(this.toJSON()));
