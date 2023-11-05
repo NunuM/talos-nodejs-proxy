@@ -7,6 +7,9 @@ import appConfigurationSchema from './scema/app-config.schema.json';
 import path from 'path';
 import fs from "fs";
 import {MiddlewareRegistry} from "../middleware/middleware-registry";
+import {Header, HttpHeaders} from "pluto-http-client";
+import util from "util";
+import {Buffer} from "buffer";
 
 interface Proxy {
     globalMiddlewares: Array<{ type: MiddlewareRegistry, args: { [key: string]: any } }>,
@@ -149,6 +152,22 @@ export class Config {
      */
     static administration(): AdminAPI {
         return config.administration;
+    }
+
+    static adminAPIHeader(): Header {
+        if(config.administration.authenticator.type === 'none') {
+            return new Header(HttpHeaders.AUTHORIZATION, "none");
+        } else if(config.administration.authenticator.type === 'basic') {
+
+            const basicAuth = Buffer.from(
+                util.format("%s:%s",
+                    config.administration.authenticator.username,
+                    config.administration.authenticator.password)
+            ).toString('base64');
+
+            return new Header(HttpHeaders.AUTHORIZATION, util.format("Basic %s", basicAuth));
+        }
+        return new Header(HttpHeaders.AUTHORIZATION, "none");
     }
 
     /**

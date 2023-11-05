@@ -3,10 +3,11 @@ import {LOGGER} from "../service/logger-service";
 import {Gateway, GatewaysTypes} from "./gateway";
 import {LoadBalancerFactory, LoadBalancerType} from "../load_balancer/load-balancer-type";
 import {Identifiable} from "pluto-http-client/dist/framework/identifiable";
-import {TimeUnit} from "pluto-http-client";
+import {ClientBuilder, JsonEntity, LoggingFilter, StringEntity, TimeUnit} from "pluto-http-client";
 import {ServerRequest} from "./request";
 import {Middleware} from "../middleware/middleware";
 import {MiddlewareFactory, MiddlewareRegistry} from "../middleware/middleware-registry";
+import {Config} from "../app/config";
 
 
 /**
@@ -193,6 +194,35 @@ export class VirtualHost extends Gateway implements Identifiable {
         }
 
         return result;
+    }
+
+    async addGatewayViaAdminAPI(): Promise<boolean> {
+
+        const header = Config.adminAPIHeader();
+
+        const client = new ClientBuilder()
+            .header(header.key, header.value)
+            .withTimeout(1, TimeUnit.Minutes)
+            .withFilter(new LoggingFilter((msg) => {
+                LOGGER.info(msg)
+            }))
+            .build();
+
+        const response = await client.target(`http://localhost:${Config.administration().port}`)
+            .path("/api/v1/virtualhost")
+            .request()
+            .post(new JsonEntity(this.toJSON()));
+
+        if (!response.getStatusInfo().getFamily().isSuccessful()) {
+
+            const entity = await response.readEntity(new StringEntity());
+
+            LOGGER.error("Error adding virtualhost via admin api", this.toJSON(), response.getStatus(), entity);
+
+            return false;
+        } else {
+            return true;
+        }
     }
 }
 

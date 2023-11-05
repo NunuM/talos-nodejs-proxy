@@ -7,7 +7,8 @@ This is a reverse proxy server that allows you to configure virtual hosts and th
 ### Overview
 
 This reverse proxy server provides powerful Layer 7 (L7) routing capabilities based on virtual hosts and API gateway routes. It allows you to configure how incoming HTTP requests are routed to the appropriate upstream servers based on the requested hostname and path.
-Features
+
+### Features
 
 #### 1. Virtual Host Routing
 

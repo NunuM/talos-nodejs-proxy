@@ -50,7 +50,6 @@ export abstract class Gateway {
 
     abstract get isRegexBased(): boolean;
 
-
     abstract resolveUpstream(request: ServerRequest): UpstreamHost | undefined;
 
     abstract match(domain: string): boolean;
@@ -68,6 +67,8 @@ export abstract class Gateway {
     }
 
     abstract toJSON(): any;
+
+    abstract addGatewayViaAdminAPI() : Promise<boolean>;
 
     request(processor: MiddlewareProcessor, request: ServerRequest, response: ServerResponse) {
 

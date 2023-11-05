@@ -9,6 +9,7 @@ import {AdminApiService} from "./admin-api-service";
 import {VirtualHost} from "../model/virtual-host";
 import {ApiGateway} from "../model/api-gateway";
 import {Repository} from "../repository/repository";
+import {Gateway} from "../model/gateway";
 
 enum Command {
     Add,
@@ -34,6 +35,12 @@ export class ProxyStarterService {
             repositoryPromise
                 .then((repository) => {
                     const adminApiService = new AdminApiService(repository);
+
+                    gatewayHostService.on('resolved', (gateway) => {
+                        repository.saveGateway(gateway).catch((error) => {
+                            LOGGER.error("Error saving gateway", gateway, error)
+                        })
+                    });
 
                     adminApiService.on('gateway', (gateway) => {
                         gatewayHostService.addGatewayHost(gateway);
@@ -108,8 +115,6 @@ export class ProxyStarterService {
                     for (let i = 0; i < workers; i++) {
                         cluster.fork();
                     }
-
-
                 })
                 .catch((error) => {
                     LOGGER.error("Error connecting to repository", error);
@@ -127,6 +132,13 @@ export class ProxyStarterService {
 
             repositoryPromise
                 .then((repository) => {
+
+                    gatewayHostService.on('resolved', (gateway: Gateway) => {
+                        gateway.addGatewayViaAdminAPI()
+                            .catch((error) => {
+                                LOGGER.error("Error adding via admin api", error);
+                            });
+                    });
 
                     function logError(error: Error) {
                         WORKER_LOGGER.log("Error saving response stats", error);

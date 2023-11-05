@@ -3,10 +3,11 @@ import {UpstreamHost} from "./upstream-host";
 import {LOGGER} from "../service/logger-service";
 import {LoadBalancerFactory, LoadBalancerType} from "../load_balancer/load-balancer-type";
 import {Identifiable} from "pluto-http-client/dist/framework/identifiable";
-import {TimeUnit} from "pluto-http-client";
+import {ClientBuilder, JsonEntity, StringEntity, TimeUnit} from "pluto-http-client";
 import {ServerRequest} from "./request";
 import {MiddlewareFactory, MiddlewareRegistry} from "../middleware/middleware-registry";
 import {Middleware} from "../middleware/middleware";
+import {Config} from "../app/config";
 
 export class ApiGateway extends Gateway implements Identifiable {
 
@@ -233,6 +234,31 @@ export class ApiGateway extends Gateway implements Identifiable {
         }
 
         return undefined;
+    }
+
+    async addGatewayViaAdminAPI() : Promise<boolean> {
+        const header = Config.adminAPIHeader();
+
+        const client = new ClientBuilder()
+            .header(header.key, header.value)
+            .withTimeout(1, TimeUnit.Minutes)
+            .build();
+
+        const response = await client.target(`http://localhost:${Config.administration().port}`)
+            .path("/api/v1/api-gateway")
+            .request()
+            .post(new JsonEntity(this.toJSON()));
+
+        if (!response.getStatusInfo().getFamily().isSuccessful()) {
+
+            const entity = await response.readEntity(new StringEntity());
+
+            LOGGER.error("Error adding api gateway via admin api", this.toJSON(), response.getStatus(), entity);
+
+            return false;
+        } else {
+            return true;
+        }
     }
 }
 

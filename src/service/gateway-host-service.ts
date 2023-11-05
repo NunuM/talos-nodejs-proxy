@@ -51,7 +51,7 @@ export class GatewayHostService extends EventEmitter {
      */
     addGatewayHost(gateway: Gateway) {
 
-        LOGGER.debug("adding gateway:", gateway.domain);
+        LOGGER.info("adding gateway:", gateway.domain);
 
         if (gateway.isRegexBased) {
 
@@ -101,6 +101,8 @@ export class GatewayHostService extends EventEmitter {
                 const gateway = candidate.clone(hostHeaderValue);
 
                 this.addGatewayHost(gateway);
+
+                this.emit("resolved", gateway);
 
                 return gateway;
             }
