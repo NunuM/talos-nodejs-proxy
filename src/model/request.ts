@@ -70,10 +70,6 @@ export class Http1Request implements ServerRequest {
 
         const abortController = new AbortController();
 
-        this._request.setTimeout(gateway.requestTimeout, () => {
-            abortController.abort("Socket timeout");
-        });
-
         const copy = JSON.parse(JSON.stringify(this._request.headers));
 
         copy.host = gateway.domain;
@@ -178,13 +174,13 @@ export class Http2CompatibleModeRequest implements ServerRequest {
         return this._request.pipe(writable);
     }
 
+    unpipe(writable: Writable): void {
+        this._request.unpipe(writable);
+    }
+
     proxyOptionsFor(gateway: Gateway, upstream: UpstreamHost): ProxyRequestOptions {
 
         const abortController = new AbortController();
-
-        this._request.setTimeout(gateway.requestTimeout, () => {
-            abortController.abort("Socket timeout");
-        });
 
         const copy = JSON.parse(JSON.stringify(this._request.headers));
 
@@ -306,10 +302,6 @@ export class Http2Request implements ServerRequest {
     proxyOptionsFor(gateway: Gateway, upstream: UpstreamHost): ProxyRequestOptions {
 
         const abortController = new AbortController();
-
-        this._stream.setTimeout(gateway.requestTimeout, () => {
-            abortController.abort("Socket timeout");
-        });
 
         if (upstream.isHTTP2) {
             return {
