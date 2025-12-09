@@ -4,6 +4,7 @@ import {ClientResponse, ProxyResponse, ServerResponse} from "../model/response";
 import {UpstreamHost} from "../model/upstream-host";
 import {ProxyRequestOptions} from "../model/proxy-request-options";
 import {MiddlewareRegistry} from "./middleware-registry";
+import {LOGGER} from "../service/logger-service";
 
 export class SpamFilter implements Middleware {
 
@@ -21,6 +22,9 @@ export class SpamFilter implements Middleware {
                 case 'MethodRequestFilter':
                     this._requestFilter = new MethodRequestFilter(parts[1]);
                     break;
+                case 'ContainsStringInPathSpamFilter':
+                    this._requestFilter = new ContainsStringInPathSpamFilter(parts[1]);
+                    break;
             }
         }
     }
@@ -28,9 +32,12 @@ export class SpamFilter implements Middleware {
     onProxyRequest(proxyRequest: ServerRequest, proxyResponse: ServerResponse, next: () => void): void {
         if (this._requestFilter) {
             if (!this._requestFilter.isValid(proxyRequest)) {
+
+                LOGGER.debug("Blocking request:", this._requestFilter.toString(), proxyRequest.path);
+
                 proxyResponse.setHeader("Connection", "close");
                 //mess with their parsers
-                proxyResponse.setHeader("Content-Length", "-10");
+                proxyResponse.setHeader("Content-Length", "-10.5");
                 const randomStatusCode = Math.floor(Math.random() * 400) + 600;
                 proxyResponse.endWithStatus(randomStatusCode);
 
@@ -73,34 +80,99 @@ interface SpamRequestFilter {
 }
 
 class EndsWithPathSpamFilter implements SpamRequestFilter {
-    private readonly _value: string;
+    private readonly _value: string | string[];
 
     constructor(value: string) {
-        this._value = value;
+        if (value.includes(",")) {
+            this._value = value.split(",");
+        } else {
+            this._value = value;
+        }
     }
 
     isValid(proxyRequest: ServerRequest): boolean {
-
+        let path: string = proxyRequest.path;
         try {
-            const url = new URL("http://localhost"+proxyRequest.path);
-            return !url.pathname.endsWith(this._value);
+            const url = new URL("http://localhost" + proxyRequest.path);
+            path = url.pathname;
         } catch (e) {
             //NOP
         }
 
-        return !proxyRequest.path.endsWith(this._value);
+        if (Array.isArray(this._value)) {
+            for (let token of this._value) {
+                if (path.endsWith(token)) {
+                    return false;
+                }
+            }
+            return true;
+        } else {
+            return !path.endsWith(this._value);
+        }
+    }
+
+    toString(): string {
+        return 'EndsWithPathSpamFilter:' + this._value;
+    }
+}
+
+class ContainsStringInPathSpamFilter implements SpamRequestFilter {
+    private readonly _value: string | string[];
+
+    constructor(value: string) {
+        if (value.includes(",")) {
+            this._value = value.split(",");
+        } else {
+            this._value = value;
+        }
+    }
+
+    isValid(proxyRequest: ServerRequest): boolean {
+        const path: string = proxyRequest.path;
+
+        if (Array.isArray(this._value)) {
+            for (let token of this._value) {
+                if (path.includes(token)) {
+                    return false;
+                }
+            }
+            return true;
+        } else {
+            return !path.endsWith(this._value);
+        }
+    }
+
+    toString(): string {
+        return 'ContainsStringInPathSpamFilter:' + this._value;
     }
 }
 
 class MethodRequestFilter implements SpamRequestFilter {
+    private readonly _value: string | string[];
 
-    private readonly _method: string;
-
-    constructor(method: string) {
-        this._method = method;
+    constructor(value: string) {
+        if (value.includes(",")) {
+            this._value = value.split(",");
+        } else {
+            this._value = value;
+        }
     }
 
     isValid(proxyRequest: ServerRequest): boolean {
-        return !(proxyRequest.method === this._method);
+        const method = proxyRequest.method ?? '';
+        if (Array.isArray(this._value)) {
+            for (let token of this._value) {
+                if (method == token) {
+                    return false;
+                }
+            }
+            return true;
+        } else {
+            return !(method === this._value);
+        }
+    }
+
+    toString(): string {
+        return 'MethodRequestFilter:' + this._value;
     }
 }

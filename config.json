@@ -6,6 +6,24 @@
       {
         "type": "AccessLoggingMiddleware",
         "args": {}
+      },
+      {
+        "type": "SpamFilter",
+        "args": {
+          "strategy": "MethodRequestFilter;PROPFIND"
+        }
+      },
+      {
+        "type": "SpamFilter",
+        "args": {
+          "strategy": "EndsWithPathSpamFilter;php"
+        }
+      },
+      {
+        "type": "SpamFilter",
+        "args": {
+          "strategy": "ContainsStringInPathSpamFilter;wp-,.git"
+        }
       }
     ],
     "servers": [
@@ -13,15 +31,6 @@
         "port": 7080,
         "protocol": "http",
         "options": {}
-      },
-      {
-        "port": 7081,
-        "protocol": "http2",
-        "options": {
-          "key": "ssl/key3.pem",
-          "cert": "ssl/cert3.pem",
-          "allowHTTP1": true
-        }
       }
     ],
     "gateways": []
