@@ -33,17 +33,24 @@ export class SpamFilter implements Middleware {
                 proxyResponse.setHeader("Content-Length", "-10");
                 const randomStatusCode = Math.floor(Math.random() * 400) + 600;
                 proxyResponse.endWithStatus(randomStatusCode);
+
+                return;
             }
         }
+
+        next();
     }
 
     onProxyResponse(proxyResponse: ProxyResponse, next: () => void): void {
+        next();
     }
 
     postUpstreamResponse(upstreamRequest: ClientResponse, proxyResponse: ServerResponse, next: () => void): void {
+        next();
     }
 
     preUpstreamRequest(upstream: UpstreamHost, options: ProxyRequestOptions, proxyResponse: ServerResponse, next: () => void): void {
+        next();
     }
 
     equals(other: any): boolean {
@@ -73,6 +80,14 @@ class EndsWithPathSpamFilter implements SpamRequestFilter {
     }
 
     isValid(proxyRequest: ServerRequest): boolean {
+
+        try {
+            const url = new URL("http://localhost"+proxyRequest.path);
+            return !url.pathname.endsWith(this._value);
+        } catch (e) {
+            //NOP
+        }
+
         return !proxyRequest.path.endsWith(this._value);
     }
 }
