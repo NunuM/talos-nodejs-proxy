@@ -32,14 +32,14 @@ export class SpamFilter implements Middleware {
     onProxyRequest(proxyRequest: ServerRequest, proxyResponse: ServerResponse, next: () => void): void {
         if (this._requestFilter) {
             if (!this._requestFilter.isValid(proxyRequest)) {
-
-                LOGGER.debug("Blocking request:", this._requestFilter.toString(), proxyRequest.path);
+                const status = getRandomInt(100, 599);
+                LOGGER.debug("Blocking request:", this._requestFilter.toString(), proxyRequest.path, status);
 
                 proxyResponse.setHeader("Connection", "close");
                 //mess with their parsers
                 proxyResponse.setHeader("Content-Length", "-10.5");
-                const randomStatusCode = Math.floor(Math.random() * 400) + 600;
-                proxyResponse.endWithStatus(randomStatusCode);
+
+                proxyResponse.endWithStatus(status);
 
                 return;
             }
@@ -175,4 +175,10 @@ class MethodRequestFilter implements SpamRequestFilter {
     toString(): string {
         return 'MethodRequestFilter:' + this._value;
     }
+}
+
+function getRandomInt(min: number, max: number): number {
+    const minCeiled = Math.ceil(min);
+    const maxFloored = Math.floor(max);
+    return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled);
 }
