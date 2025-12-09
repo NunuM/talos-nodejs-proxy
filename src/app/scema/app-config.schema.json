@@ -27,7 +27,8 @@
                   "GatewayInMaintenanceMiddleware",
                   "CorrelationIdMiddleware",
                   "GatewayStatsCollectorMiddleware",
-                  "RedirectMiddleware"
+                  "RedirectMiddleware",
+                  "SpamFilter"
                 ]
               },
               "args": {

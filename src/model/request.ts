@@ -10,6 +10,8 @@ import {Gateway} from "./gateway";
 
 export interface ServerRequest {
 
+    get method(): string | undefined;
+
     get path(): string;
 
     get host(): string | string[] | undefined;
@@ -38,6 +40,10 @@ export class Http1Request implements ServerRequest {
 
     constructor(request: http.IncomingMessage) {
         this._request = request;
+    }
+
+    get method(): string | undefined {
+        return this._request.method;
     }
 
     get path() {
@@ -133,6 +139,10 @@ export class Http2CompatibleModeRequest implements ServerRequest {
         if (!this._request.headers.host) {
             this._request.headers.host = this._request.authority;
         }
+    }
+
+    get method(): string | undefined {
+        return this._request.method;
     }
 
     get acceptEncoding(): string {
@@ -279,6 +289,11 @@ export class Http2Request implements ServerRequest {
 
     get host() {
         return this._headers2[constants.HTTP2_HEADER_HOST] || this._headers2[constants.HTTP2_HEADER_AUTHORITY];
+    }
+
+    get method(): string | undefined {
+        //@ts-ignore
+        return this._headers2[constants.HTTP2_HEADER_METHOD];
     }
 
     get acceptEncoding(): string {

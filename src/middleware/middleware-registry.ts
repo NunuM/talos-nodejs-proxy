@@ -7,6 +7,7 @@ import {GatewayStatsCollectorMiddlewareFactory} from "./factory/gateway-stats-co
 import {Middleware} from "./middleware";
 import {RedirectMiddleware} from "./redirect-middleware";
 import {EncodingMiddlewareFactory} from "./factory/encoding-middleware-factory";
+import {SpamFilter} from "./spam-filter";
 
 export enum MiddlewareRegistry {
     AccessLogging = 'AccessLoggingMiddleware',
@@ -15,7 +16,8 @@ export enum MiddlewareRegistry {
     GatewayInMaintenance = 'GatewayInMaintenanceMiddleware',
     GatewayStatsCollector = 'GatewayStatsCollectorMiddleware',
     CorrelationId = 'CorrelationIdMiddleware',
-    Redirect = 'RedirectMiddleware'
+    Redirect = 'RedirectMiddleware',
+    SpamFilter = 'SpamFilter'
 }
 
 export class MiddlewareFactory {
@@ -35,6 +37,9 @@ export class MiddlewareFactory {
                 return new GatewayStatsCollectorMiddlewareFactory(Object.assign(deserialized.args, {domain}));
             case MiddlewareRegistry.CorrelationId:
                 return new CorrelationIdMiddleware();
+            case MiddlewareRegistry.SpamFilter:
+                //@ts-ignore
+                return new SpamFilter(Object.assign(deserialized.args, {domain}));
             case MiddlewareRegistry.Redirect:
                 //@ts-ignore
                 return new RedirectMiddleware(deserialized.args);
@@ -54,5 +59,5 @@ export const MiddlewareList = [
     {id: MiddlewareRegistry.CorrelationId, name: 'CorrelationIdMiddleware', args: {}},
     {id: MiddlewareRegistry.GatewayStatsCollector, name: 'GatewayStatsCollectorMiddleware', args: {}},
     {id: MiddlewareRegistry.Redirect, name: 'RedirectMiddleware', args: RedirectMiddleware.args()},
-
+    {id: MiddlewareRegistry.SpamFilter, name: 'SpamFilter', args: SpamFilter.args()}
 ]
