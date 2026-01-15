@@ -62,3 +62,15 @@ export class HeadersConverter {
         return httpHeaders;
     }
 }
+
+export class ResponseUtil {
+    static skipPipeline(status: number): boolean {
+        if (status === 204
+            || status === 304
+            || (status >= 100 && status < 200)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+}

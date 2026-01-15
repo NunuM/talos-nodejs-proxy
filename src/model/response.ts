@@ -2,7 +2,7 @@ import http from "http";
 import http2 from "http2";
 import {pipeline, Readable, Transform} from "stream";
 import {LOGGER} from "../service/logger-service";
-import {HeadersConverter, Protocol} from "./protocol";
+import {HeadersConverter, Protocol, ResponseUtil} from "./protocol";
 
 export interface ServerResponse {
 
@@ -71,7 +71,6 @@ class ProxyResponseImpl implements ServerResponse, ProxyResponse {
     send(): void {
         this._sink.finally(this._source.status, this._source.headers, this._source.readable);
     }
-
 }
 
 
@@ -106,6 +105,11 @@ export class Http1Response implements ServerResponse {
 
         this._serverResponse.writeHead(status, Object.assign(headers, this._headers));
 
+        if (ResponseUtil.skipPipeline(status)) {
+            this._serverResponse.end();
+            return;
+        }
+
         //@ts-ignore
         pipeline(stream, ...this._transform, this._serverResponse, (error) => {
             if (error) {
@@ -138,6 +142,11 @@ export class Http2CompatibleModeResponse implements ServerResponse {
 
     finally(status: number, headers: any, stream: Readable): void {
         this._response.writeHead(status, Object.assign(headers, this._headers));
+
+        if (ResponseUtil.skipPipeline(status)) {
+            this._response.end();
+            return;
+        }
 
         //@ts-ignore
         pipeline(stream, ...this._transform, this._response, (error) => {
@@ -217,6 +226,11 @@ export class Http2Response implements ServerResponse {
             [http2.constants.HTTP2_HEADER_STATUS]: status,
             ...Object.assign(headers, this._headers)
         });
+
+        if (ResponseUtil.skipPipeline(status)) {
+            this._serverResponse.end();
+            return;
+        }
 
         //@ts-ignore
         pipeline(stream, ...this._transform, this._serverResponse, (error) => {
