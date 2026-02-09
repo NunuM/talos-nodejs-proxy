@@ -35,10 +35,8 @@ export class SpamFilter implements Middleware {
                 LOGGER.debug("Blocking request:", this._requestFilter.toString(), proxyRequest.path, 504);
 
                 proxyResponse.setHeader("Connection", "close");
-                //mess with their parsers
-                proxyResponse.setHeader("Content-Length", "-10.5");
 
-                proxyResponse.endWithStatus(504);
+                proxyResponse.endWithStatus(200);
 
                 return;
             }

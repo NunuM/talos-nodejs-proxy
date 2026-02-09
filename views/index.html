@@ -736,10 +736,15 @@
                                                         }
                                                     }
                                                 } else {
-                                                    middleware.payload = {
-                                                        type: middleware.id,
-                                                        args: {
-                                                            [key]: result
+                                                    if (middleware.payload
+                                                        && middleware.payload.args) {
+                                                        middleware.payload.args[key] = result;
+                                                    } else {
+                                                        middleware.payload = {
+                                                            type: middleware.id,
+                                                            args: {
+                                                                [key]: result
+                                                            }
                                                         }
                                                     }
                                                 }
